@@ -1,0 +1,8 @@
+{
+  "baseUrl": "https://matrix-client.matrix.org",
+  "username": "",
+  "password": "",
+  "admins": [
+    "@dominik:fuchss.org"
+  ]
+}
