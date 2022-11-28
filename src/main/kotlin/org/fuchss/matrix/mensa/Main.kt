@@ -62,7 +62,8 @@ private fun scheduleMensaMessages(matrixBot: MatrixBot, config: Config): Timer {
                 }
             }
         },
-        config.nextTimer(), 24 * 60 * 60 * 1000
+        config.nextTimer(),
+        24 * 60 * 60 * 1000
     )
     return timer
 }
