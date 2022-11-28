@@ -3,12 +3,11 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>lunchmatrix</artifactId>
+    <artifactId>mensabot</artifactId>
     <groupId>org.fuchss.matrix</groupId>
-    <version>0.1-SNAPSHOT</version>
+    <version>develop-SNAPSHOT</version>
     <packaging>jar</packaging>
-
-    <name>LunchMatrix</name>
+    <name>MensaBot</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -134,6 +133,11 @@
             <version>${jackson.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
@@ -191,7 +195,7 @@
         <dependency>
             <groupId>org.commonmark</groupId>
             <artifactId>commonmark</artifactId>
-            <version>0.20.0</version>
+            <version>0.21.0</version>
         </dependency>
     </dependencies>
 </project>

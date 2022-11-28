@@ -1,8 +1,13 @@
 {
+  "prefix": "mensa",
   "baseUrl": "https://matrix-client.matrix.org",
   "username": "",
   "password": "",
+  "timeToSendUpdates": "07:30",
   "admins": [
     "@dominik:fuchss.org"
+  ],
+  "subscribers": [
+    "!hWfOQtWATtrCHTrZVU:fuchss.org"
   ]
 }

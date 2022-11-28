@@ -11,12 +11,12 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.fuchss.matrix.mensa.data.Mensa
-import org.fuchss.matrix.mensa.data.Mensa.Companion.TZ
+
 
 class MensaAPI {
     private lateinit var mensa: List<Mensa>
 
-    suspend fun foodAtDate(date: LocalDate = Clock.System.todayIn(TimeZone.of(TZ))): List<Mensa> {
+    suspend fun foodAtDate(date: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())): List<Mensa> {
         if (!this::mensa.isInitialized) mensa = request()
         return mensa.map { m -> m to (m.mensaLines[date]?.toList() ?: listOf()) }.filter { (_, lines) -> lines.isNotEmpty() }.map { (m, f) -> m.with(date, f) }
     }

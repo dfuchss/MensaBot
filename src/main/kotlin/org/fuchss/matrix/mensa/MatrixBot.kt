@@ -50,11 +50,11 @@ class MatrixBot(private val matrixClient: IMatrixClient, private val config: Con
     fun room() = matrixClient.room
 
     fun subscribeAllEvents(subscriber: EventSubscriber<EventContent>) = matrixClient.api.sync.subscribeAllEvents { event ->
-        if (valid(event)) subscriber(event)
+        if (valid(event, true)) subscriber(event)
     }
 
-    fun <T : EventContent> subscribe(clazz: KClass<T>, subscriber: EventSubscriber<T>) {
-        matrixClient.api.sync.subscribe(clazz) { event -> if (valid(event)) subscriber(event) }
+    fun <T : EventContent> subscribe(clazz: KClass<T>, subscriber: EventSubscriber<T>, listenNonAdmins: Boolean = false) {
+        matrixClient.api.sync.subscribe(clazz) { event -> if (valid(event, listenNonAdmins)) subscriber(event) }
     }
 
 
@@ -63,8 +63,8 @@ class MatrixBot(private val matrixClient: IMatrixClient, private val config: Con
         matrixClient.stopSync()
     }
 
-    private fun valid(event: Event<*>): Boolean {
-        if (!config.isAdmin(event.getSender())) return false
+    private fun valid(event: Event<*>, listenNonAdmins: Boolean): Boolean {
+        if (!config.isAdmin(event.getSender()) && !listenNonAdmins) return false
         if (event.getSender() == matrixClient.userId) return false
         if (event.getOriginTimestamp() == null || Instant.fromEpochMilliseconds(event.getOriginTimestamp()!!) < runningTimestamp) return false
         return true
