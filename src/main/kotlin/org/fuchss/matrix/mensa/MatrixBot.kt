@@ -62,6 +62,12 @@ class MatrixBot(private val matrixClient: IMatrixClient, private val config: Con
         matrixClient.stopSync()
     }
 
+    suspend fun logoutOtherSessions() {
+        val devices = matrixClient.api.devices.getDevices(asUserId = matrixClient.userId).getOrThrow().toMutableList()
+        devices.removeIf { it.deviceId == matrixClient.deviceId }
+        devices.forEach { matrixClient.api.devices.deleteDevice(it.deviceId, asUserId = matrixClient.userId).getOrThrow() }
+    }
+
     private fun valid(event: Event<*>, listenNonAdmins: Boolean): Boolean {
         if (!config.isAdmin(event.getSender()) && !listenNonAdmins) return false
         if (event.getSender() == matrixClient.userId) return false
