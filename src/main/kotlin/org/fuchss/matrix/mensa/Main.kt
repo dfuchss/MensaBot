@@ -51,23 +51,27 @@ fun main() {
 
 private fun scheduleMensaMessages(matrixBot: MatrixBot, config: Config): Timer {
     val timer = Timer()
-    timer.schedule(object : TimerTask() {
-        override fun run() {
-            runBlocking {
-                logger.debug("Sending Mensa to Rooms (Scheduled) ...")
-                // Reinit Mensa API after one day ..
-                mensa = MensaAPI()
-                config.subscriptions().forEach { roomId -> printMensa(roomId, matrixBot) }
+    timer.schedule(
+        object : TimerTask() {
+            override fun run() {
+                runBlocking {
+                    logger.debug("Sending Mensa to Rooms (Scheduled) ...")
+                    // Reinit Mensa API after one day ..
+                    mensa = MensaAPI()
+                    config.subscriptions().forEach { roomId -> printMensa(roomId, matrixBot) }
+                }
             }
-        }
-    }, config.nextTimer(), 24 * 60 * 60 * 1000)
+        },
+        config.nextTimer(), 24 * 60 * 60 * 1000
+    )
     return timer
 }
 
 private suspend fun handleTextMessage(event: Event<RoomMessageEventContent.TextMessageEventContent>, matrixBot: MatrixBot, config: Config) {
     var message = event.content.body
-    if (!message.startsWith("!${config.prefix}"))
+    if (!message.startsWith("!${config.prefix}")) {
         return
+    }
 
     message = message.substring("!${config.prefix}".length).trim()
 
@@ -79,7 +83,6 @@ private suspend fun handleTextMessage(event: Event<RoomMessageEventContent.TextM
         "subscribe" -> subscribe(event.getRoomId()!!, matrixBot, config)
     }
 }
-
 
 private suspend fun help(event: Event<RoomMessageEventContent.TextMessageEventContent>, matrixBot: MatrixBot, config: Config) {
     val helpMessage = """
@@ -107,8 +110,9 @@ private suspend fun printMensa(roomId: RoomId, matrixBot: MatrixBot) {
 
     val food = mensa.foodAtDate()
     var response = ""
-    if (food.isEmpty() || food.all { mensa -> mensa.mensaLinesAtDate()!!.isEmpty() }) response = "Kein Essen heute :("
-    else {
+    if (food.isEmpty() || food.all { mensa -> mensa.mensaLinesAtDate()!!.isEmpty() }) {
+        response = "Kein Essen heute :("
+    } else {
         for (m in food) {
             response += "# ${m.name}\n"
             for (l in m.mensaLinesAtDate()!!) {
@@ -145,5 +149,3 @@ private fun MessageBuilder.markdown(markdown: String) {
     val html = HtmlRenderer.builder().build().render(document)
     text(markdown, format = "org.matrix.custom.html", formattedBody = html)
 }
-
-

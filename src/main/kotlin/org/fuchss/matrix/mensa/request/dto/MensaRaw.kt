@@ -7,5 +7,5 @@ import com.fasterxml.jackson.annotation.JsonProperty
 data class MensaRaw(
     @JsonProperty("id") val id: String,
     @JsonProperty("name") val name: String,
-    @JsonProperty("lines") val lineNames: Map<String, String>,
+    @JsonProperty("lines") val lineNames: Map<String, String>
 )

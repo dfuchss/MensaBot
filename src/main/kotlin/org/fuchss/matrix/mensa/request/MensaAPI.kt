@@ -12,7 +12,6 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.fuchss.matrix.mensa.data.Mensa
 
-
 class MensaAPI {
     private lateinit var mensa: List<Mensa>
 
@@ -33,6 +32,4 @@ class MensaAPI {
 
         return MensaParser().parseMensa(response.body())
     }
-
-
 }

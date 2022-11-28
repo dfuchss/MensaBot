@@ -57,7 +57,6 @@ class MatrixBot(private val matrixClient: IMatrixClient, private val config: Con
         matrixClient.api.sync.subscribe(clazz) { event -> if (valid(event, listenNonAdmins)) subscriber(event) }
     }
 
-
     suspend fun quit() {
         runningLock.release()
         matrixClient.stopSync()

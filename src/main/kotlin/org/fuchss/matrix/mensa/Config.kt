@@ -31,8 +31,9 @@ data class Config(
         fun load(): Config {
             val configPath = System.getenv("CONFIG_PATH") ?: "./config.json"
             val configFile = File(configPath)
-            if (!configFile.exists())
+            if (!configFile.exists()) {
                 error("Config ${configFile.absolutePath} does not exist!")
+            }
 
             val config: Config = ObjectMapper().registerKotlinModule().registerModule(JavaTimeModule()).readValue(configFile)
             log.info("Loaded config ${configFile.absolutePath}")
@@ -41,18 +42,21 @@ data class Config(
     }
 
     fun isAdmin(user: UserId?): Boolean {
-        if (user == null)
+        if (user == null) {
             return false
-        if (admins.isEmpty())
+        }
+        if (admins.isEmpty()) {
             return true
+        }
         return user.full in admins
     }
 
     fun subscriptions() = subscribers.map { RoomId(it) }
     fun nextTimer(): Date {
         val today = timeToSendUpdates.toJavaLocalTime().atDate(LocalDate.now()).atZone(ZoneId.systemDefault())
-        if (today.toInstant().isAfter(Instant.now()))
+        if (today.toInstant().isAfter(Instant.now())) {
             return Date.from(today.toInstant())
+        }
         // Else use tomorrow ..
         return Date.from(timeToSendUpdates.toJavaLocalTime().atDate(LocalDate.now().plusDays(1)).atZone(ZoneId.systemDefault()).toInstant())
     }

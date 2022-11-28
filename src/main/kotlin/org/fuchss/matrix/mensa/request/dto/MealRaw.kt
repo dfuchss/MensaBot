@@ -16,9 +16,9 @@ data class MealRaw(
     @JsonProperty("price_flag") val priceAdditive: Double?
 ) {
     fun meal(): String {
-        if (dish.isNullOrBlank())
+        if (dish.isNullOrBlank()) {
             return name ?: ""
+        }
         return ((name ?: "") + " $dish").trim()
     }
 }
-

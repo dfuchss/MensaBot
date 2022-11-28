@@ -17,7 +17,6 @@ internal class MensaParser {
     private val orm = ObjectMapper().registerKotlinModule()
     private val validMensas: List<MensaRaw> = orm.readValue(MensaParser::class.java.getResourceAsStream("/valid_mensa.json")!!)
 
-
     fun parseMensa(mensaInfos: JsonNode): List<Mensa> {
         val mensaList: MutableList<Mensa> = mutableListOf()
         for (validMensa in validMensas) {
@@ -31,7 +30,6 @@ internal class MensaParser {
         }
         return mensaList
     }
-
 
     private fun parseLines(mensa: Mensa, epochSeconds: Int, lineNames: Map<String, String>, lineData: Map<String, List<MealRaw>>) {
         val mensaLines = mutableListOf<MensaLine>()
