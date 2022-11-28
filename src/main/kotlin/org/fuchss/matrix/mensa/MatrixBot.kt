@@ -27,12 +27,14 @@ class MatrixBot(private val matrixClient: IMatrixClient, private val config: Con
     private val runningTimestamp = Clock.System.now()
     private val validStates = listOf(SyncState.RUNNING, SyncState.INITIAL_SYNC, SyncState.STARTED)
     private val runningLock = Semaphore(1, 1)
+    private var running: Boolean = false
 
     init {
         matrixClient.api.sync.subscribe { event -> handleJoinEvent(event) }
     }
 
     suspend fun startBlocking() {
+        running = true
         logger.info("Starting Sync!")
         matrixClient.startSync()
         delay(1000)
@@ -44,7 +46,8 @@ class MatrixBot(private val matrixClient: IMatrixClient, private val config: Con
         while (matrixClient.syncState.value in validStates) {
             delay(500)
         }
-        matrixClient.logout()
+        running = false
+        matrixClient.api.authentication.logoutAll().getOrThrow()
     }
 
     fun room() = matrixClient.room
@@ -60,12 +63,6 @@ class MatrixBot(private val matrixClient: IMatrixClient, private val config: Con
     suspend fun quit() {
         runningLock.release()
         matrixClient.stopSync()
-    }
-
-    suspend fun logoutOtherSessions() {
-        val devices = matrixClient.api.devices.getDevices(asUserId = matrixClient.userId).getOrThrow().toMutableList()
-        devices.removeIf { it.deviceId == matrixClient.deviceId }
-        devices.forEach { matrixClient.api.devices.deleteDevice(it.deviceId, asUserId = matrixClient.userId).getOrThrow() }
     }
 
     private fun valid(event: Event<*>, listenNonAdmins: Boolean): Boolean {
@@ -101,4 +98,6 @@ class MatrixBot(private val matrixClient: IMatrixClient, private val config: Con
         val newState = myself.copy(displayName = newNameInRoom)
         matrixClient.api.rooms.sendStateEvent(roomId, newState, stateKey = matrixClient.userId.full, asUserId = matrixClient.userId).getOrThrow()
     }
+
+    fun running() = running
 }

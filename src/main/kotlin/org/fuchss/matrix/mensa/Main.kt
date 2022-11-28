@@ -46,6 +46,16 @@ fun main() {
         val timer = scheduleMensaMessages(matrixBot, config)
         matrixBot.startBlocking()
         timer.cancel()
+
+        Runtime.getRuntime().addShutdownHook(object : Thread() {
+            override fun run() {
+                runBlocking {
+                    if (matrixBot.running()) {
+                        matrixBot.quit()
+                    }
+                }
+            }
+        })
     }
 }
 
@@ -82,7 +92,6 @@ private suspend fun handleTextMessage(event: Event<RoomMessageEventContent.TextM
         "name" -> changeUsername(event, matrixBot, message)
         "show" -> printMensa(event.getRoomId()!!, matrixBot)
         "subscribe" -> subscribe(event.getRoomId()!!, matrixBot, config)
-        "logout" -> matrixBot.logoutOtherSessions()
     }
 }
 
@@ -95,7 +104,6 @@ private suspend fun help(event: Event<RoomMessageEventContent.TextMessageEventCo
         * `!${config.prefix} name [NEW_NAME] - sets the display name of the bot to NEW_NAME (only for the room)`
         * `!${config.prefix} show - shows the mensa food for the day`
         * `!${config.prefix} subscribe - shows instructions to subscribe for the channel`
-        * `!${config.prefix} logout - logout from other sessions`
     """.trimIndent()
 
     matrixBot.room().sendMessage(event.getRoomId()!!) {
