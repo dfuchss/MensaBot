@@ -15,7 +15,7 @@
         <kotlin.version>1.7.20</kotlin.version>
         <ktor.version>2.1.3</ktor.version>
         <spotless.version>2.20.2</spotless.version>
-        <jackson.version>2.14.0</jackson.version>
+        <jackson.version>2.14.1</jackson.version>
         <trixnity.version>2.3.8</trixnity.version>
         <slf4j.version>2.0.4</slf4j.version>
         <main.class>org.fuchss.matrix.mensa.MainKt</main.class>
