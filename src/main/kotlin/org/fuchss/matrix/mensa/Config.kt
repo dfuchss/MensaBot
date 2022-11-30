@@ -53,11 +53,11 @@ data class Config(
 
     fun subscriptions() = subscribers.map { RoomId(it) }
     fun nextTimer(): Date {
-        val today = timeToSendUpdates.toJavaLocalTime().atDate(LocalDate.now()).atZone(ZoneId.systemDefault())
-        if (today.toInstant().isAfter(Instant.now())) {
-            return Date.from(today.toInstant())
+        var nextUpdate = timeToSendUpdates.toJavaLocalTime().atDate(LocalDate.now()).atZone(ZoneId.systemDefault())
+        if (!nextUpdate.toInstant().isAfter(Instant.now())) {
+            // Else use tomorrow ..
+            nextUpdate = nextUpdate.plusDays(1)
         }
-        // Else use tomorrow ..
-        return Date.from(timeToSendUpdates.toJavaLocalTime().atDate(LocalDate.now().plusDays(1)).atZone(ZoneId.systemDefault()).toInstant())
+        return Date.from(nextUpdate.toInstant())
     }
 }

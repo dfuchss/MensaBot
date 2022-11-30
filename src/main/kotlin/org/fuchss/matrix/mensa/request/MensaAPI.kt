@@ -13,23 +13,21 @@ import kotlinx.datetime.todayIn
 import org.fuchss.matrix.mensa.data.Mensa
 
 class MensaAPI {
+    private val mensaParser = MensaParser()
     private lateinit var mensa: List<Mensa>
 
     suspend fun foodAtDate(date: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())): List<Mensa> {
-        if (!this::mensa.isInitialized) mensa = request()
-        return mensa.map { m -> m to (m.mensaLines[date]?.toList() ?: listOf()) }.filter { (_, lines) -> lines.isNotEmpty() }.map { (m, f) -> m.with(date, f) }
+        if (!this::mensa.isInitialized) {
+            mensa = request()
+        }
+        return mensa.map { m -> m to (m.mensaLines[date]?.toList() ?: listOf()) }.filter { (_, lines) -> lines.isNotEmpty() }.map { (m, f) -> m.mensaOnlyWithLines(date, f) }
     }
 
     private suspend fun request(): List<Mensa> {
-        val client = HttpClient() {
-            install(ContentNegotiation) {
-                jackson()
-            }
-        }
+        val client = HttpClient() { install(ContentNegotiation) { jackson() } }
         val response = client.request("https://www.sw-ka.de/json_interface/canteen") {
             method = HttpMethod.Get
         }
-
-        return MensaParser().parseMensa(response.body())
+        return mensaParser.parseMensa(response.body())
     }
 }

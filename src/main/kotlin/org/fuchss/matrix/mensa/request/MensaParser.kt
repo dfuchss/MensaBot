@@ -20,27 +20,39 @@ internal class MensaParser {
     fun parseMensa(mensaInfos: JsonNode): List<Mensa> {
         val mensaList: MutableList<Mensa> = mutableListOf()
         for (validMensa in validMensas) {
-            if (!mensaInfos.has(validMensa.id)) continue
+            if (!mensaInfos.has(validMensa.id)) {
+                continue
+            }
+
             val mensa = Mensa(validMensa.id, validMensa.name)
             val dateXLine = mensaInfos.get(mensa.id).jsonToObject<Map<Int, Map<String, List<MealRaw>>>>()
             for ((date, lineData) in dateXLine) {
-                parseLines(mensa, date, validMensa.lineNames, lineData)
+                parseMensaLines(mensa, date, validMensa.lineNames, lineData)
             }
-            if (mensa.mensaLines.isNotEmpty()) mensaList.add(mensa)
+
+            if (mensa.mensaLines.isNotEmpty()) {
+                mensaList.add(mensa)
+            }
         }
         return mensaList
     }
 
-    private fun parseLines(mensa: Mensa, epochSeconds: Int, lineNames: Map<String, String>, lineData: Map<String, List<MealRaw>>) {
+    private fun parseMensaLines(mensa: Mensa, epochSeconds: Int, lineNames: Map<String, String>, lineData: Map<String, List<MealRaw>>) {
         val mensaLines = mutableListOf<MensaLine>()
         for ((lineId, lineName) in lineNames) {
-            if (lineId !in lineData.keys) continue
+            if (lineId !in lineData.keys) {
+                continue
+            }
             val rawLine = lineData[lineId]!!
             val meal = rawLine.filterNot { it.noMeal != null && it.noMeal }.map { Meal.fromMealRawData(it) }
-            if (meal.isNotEmpty()) mensaLines.add(MensaLine(lineName, meal))
+            if (meal.isNotEmpty()) {
+                mensaLines.add(MensaLine(lineName, meal))
+            }
         }
 
-        if (mensaLines.isEmpty()) return
+        if (mensaLines.isEmpty()) {
+            return
+        }
 
         val localDate = Instant.fromEpochSeconds(epochSeconds.toLong()).toLocalDateTime(TimeZone.of("Europe/Berlin")).date
         mensa.mensaLines.getOrPut(localDate) { mutableListOf() } += mensaLines

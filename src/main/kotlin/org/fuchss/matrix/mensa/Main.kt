@@ -45,37 +45,10 @@ fun main() {
 
         val timer = scheduleMensaMessages(matrixBot, config)
         matrixBot.startBlocking()
+
+        // After Shutdown
         timer.cancel()
-
-        Runtime.getRuntime().addShutdownHook(object : Thread() {
-            override fun run() {
-                runBlocking {
-                    if (matrixBot.running()) {
-                        matrixBot.quit()
-                    }
-                }
-            }
-        })
     }
-}
-
-private fun scheduleMensaMessages(matrixBot: MatrixBot, config: Config): Timer {
-    val timer = Timer()
-    timer.schedule(
-        object : TimerTask() {
-            override fun run() {
-                runBlocking {
-                    logger.debug("Sending Mensa to Rooms (Scheduled) ...")
-                    // Reinit Mensa API after one day ..
-                    mensa = MensaAPI()
-                    config.subscriptions().forEach { roomId -> printMensa(roomId, matrixBot) }
-                }
-            }
-        },
-        config.nextTimer(),
-        24 * 60 * 60 * 1000
-    )
-    return timer
 }
 
 private suspend fun handleTextMessage(event: Event<RoomMessageEventContent.TextMessageEventContent>, matrixBot: MatrixBot, config: Config) {
@@ -106,40 +79,34 @@ private suspend fun help(event: Event<RoomMessageEventContent.TextMessageEventCo
         * `!${config.prefix} subscribe - shows instructions to subscribe for the channel`
     """.trimIndent()
 
-    matrixBot.room().sendMessage(event.getRoomId()!!) {
-        markdown(helpMessage)
-    }
+    matrixBot.room().sendMessage(event.getRoomId()!!) { markdown(helpMessage) }
 }
 
 private suspend fun changeUsername(event: Event<RoomMessageEventContent.TextMessageEventContent>, matrixBot: MatrixBot, message: String) {
     val newNameInRoom = message.substring("name".length).trim()
-    if (newNameInRoom.isNotBlank()) matrixBot.renameInRoom(event.getRoomId()!!, newNameInRoom)
+    if (newNameInRoom.isNotBlank()) {
+        matrixBot.renameInRoom(event.getRoomId()!!, newNameInRoom)
+    }
 }
 
 private suspend fun printMensa(roomId: RoomId, matrixBot: MatrixBot) {
     logger.info("Sending Mensa to Room ${roomId.full}")
 
-    val food = mensa.foodAtDate()
+    val mensas = mensa.foodAtDate()
     var response = ""
-    if (food.isEmpty() || food.all { mensa -> mensa.mensaLinesAtDate()!!.isEmpty() }) {
+    if (mensas.isEmpty() || mensas.all { mensa -> mensa.mensaLinesAtDate()?.isEmpty() != false }) {
         response = "Kein Essen heute :("
     } else {
-        for (m in food) {
-            response += "# ${m.name}\n"
-            for (l in m.mensaLinesAtDate()!!) {
+        for (mensa in mensas) {
+            response += "# ${mensa.name}\n"
+            for (l in mensa.mensaLinesAtDate() ?: listOf()) {
                 response += "## ${l.title}\n"
                 for (meal in l.meals) response += "* ${meal.name}\n"
             }
         }
     }
 
-    try {
-        matrixBot.room().sendMessage(roomId) {
-            markdown(response)
-        }
-    } catch (e: Exception) {
-        logger.error(e.message, e)
-    }
+    matrixBot.room().sendMessage(roomId) { markdown(response) }
 }
 
 private suspend fun subscribe(roomId: RoomId, matrixBot: MatrixBot, config: Config) {
@@ -150,9 +117,33 @@ private suspend fun subscribe(roomId: RoomId, matrixBot: MatrixBot, config: Conf
         message += "\n* $admin"
     }
 
-    matrixBot.room().sendMessage(roomId) {
-        markdown(message)
-    }
+    matrixBot.room().sendMessage(roomId) { markdown(message) }
+}
+
+private fun scheduleMensaMessages(matrixBot: MatrixBot, config: Config): Timer {
+    val timer = Timer(true)
+    timer.schedule(
+        object : TimerTask() {
+            override fun run() {
+                runBlocking {
+                    logger.debug("Sending Mensa to Rooms (Scheduled) ...")
+                    // Reinit Mensa API
+                    mensa = MensaAPI()
+
+                    for (roomId in config.subscriptions()) {
+                        try {
+                            printMensa(roomId, matrixBot)
+                        } catch (e: Exception) {
+                            logger.error(e.message, e)
+                        }
+                    }
+                }
+            }
+        },
+        config.nextTimer(),
+        24 * 60 * 60 * 1000
+    )
+    return timer
 }
 
 private fun MessageBuilder.markdown(markdown: String) {

@@ -10,6 +10,6 @@ data class Mensa(
     val name: String,
     val mensaLines: MutableMap<LocalDate, MutableList<MensaLine>> = mutableMapOf()
 ) {
-    fun with(date: LocalDate, food: List<MensaLine>) = Mensa(id, name, mutableMapOf(date to food.toMutableList()))
+    fun mensaOnlyWithLines(date: LocalDate, mensaLines: List<MensaLine>) = Mensa(id, name, mutableMapOf(date to mensaLines.toMutableList()))
     fun mensaLinesAtDate(date: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())): List<MensaLine>? = mensaLines[date]
 }

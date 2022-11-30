@@ -1,6 +1,7 @@
 package org.fuchss.matrix.mensa
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -35,6 +36,8 @@ class MatrixBot(private val matrixClient: IMatrixClient, private val config: Con
 
     suspend fun startBlocking() {
         running = true
+        registerShutdownHook()
+
         logger.info("Starting Sync!")
         matrixClient.startSync()
         delay(1000)
@@ -47,17 +50,17 @@ class MatrixBot(private val matrixClient: IMatrixClient, private val config: Con
             delay(500)
         }
         running = false
-        matrixClient.api.authentication.logoutAll().getOrThrow()
+        matrixClient.api.authentication.logoutAll()
     }
 
     fun room() = matrixClient.room
 
     fun subscribeAllEvents(subscriber: EventSubscriber<EventContent>) = matrixClient.api.sync.subscribeAllEvents { event ->
-        if (valid(event, true)) subscriber(event)
+        if (isValidEventFromAdmin(event, true)) subscriber(event)
     }
 
     fun <T : EventContent> subscribe(clazz: KClass<T>, subscriber: EventSubscriber<T>, listenNonAdmins: Boolean = false) {
-        matrixClient.api.sync.subscribe(clazz) { event -> if (valid(event, listenNonAdmins)) subscriber(event) }
+        matrixClient.api.sync.subscribe(clazz) { event -> if (isValidEventFromAdmin(event, listenNonAdmins)) subscriber(event) }
     }
 
     suspend fun quit() {
@@ -65,7 +68,7 @@ class MatrixBot(private val matrixClient: IMatrixClient, private val config: Con
         matrixClient.stopSync()
     }
 
-    private fun valid(event: Event<*>, listenNonAdmins: Boolean): Boolean {
+    private fun isValidEventFromAdmin(event: Event<*>, listenNonAdmins: Boolean): Boolean {
         if (!config.isAdmin(event.getSender()) && !listenNonAdmins) return false
         if (event.getSender() == matrixClient.userId) return false
         if (event.getOriginTimestamp() == null || Instant.fromEpochMilliseconds(event.getOriginTimestamp()!!) < runningTimestamp) return false
@@ -96,8 +99,17 @@ class MatrixBot(private val matrixClient: IMatrixClient, private val config: Con
         val members = matrixClient.api.rooms.getMembers(roomId).getOrThrow()
         val myself = members.firstOrNull { it.stateKey == matrixClient.userId.full }?.content ?: return
         val newState = myself.copy(displayName = newNameInRoom)
-        matrixClient.api.rooms.sendStateEvent(roomId, newState, stateKey = matrixClient.userId.full, asUserId = matrixClient.userId).getOrThrow()
+        matrixClient.api.rooms.sendStateEvent(roomId, newState, stateKey = matrixClient.userId.full, asUserId = matrixClient.userId)
     }
+    private fun registerShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(object : Thread() {
+            override fun run() {
+                runBlocking { if (running) quit() }
+            }
+        })
+    }
+}
 
-    fun running() = running
+inline fun <reified T : EventContent> MatrixBot.subscribe(listenNonAdmins: Boolean = false, noinline subscriber: EventSubscriber<T>) {
+    subscribe(T::class, subscriber, listenNonAdmins)
 }
