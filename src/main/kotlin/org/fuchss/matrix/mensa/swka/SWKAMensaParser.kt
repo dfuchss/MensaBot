@@ -7,7 +7,6 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.fuchss.matrix.mensa.api.Meal
 import org.fuchss.matrix.mensa.api.Mensa
 import org.fuchss.matrix.mensa.api.MensaLine
 import org.fuchss.matrix.mensa.swka.dto.MealRaw
@@ -44,7 +43,7 @@ internal class SWKAMensaParser {
                 continue
             }
             val rawLine = lineData[lineId]!!
-            val meal = rawLine.filterNot { it.noMeal != null && it.noMeal }.map { Meal.fromMealRawData(it) }
+            val meal = rawLine.filterNot { it.noMeal != null && it.noMeal }.map { MealRaw.toMeal(it) }
             if (meal.isNotEmpty()) {
                 mensaLines.add(MensaLine(lineName, meal))
             }

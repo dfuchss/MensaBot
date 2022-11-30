@@ -2,6 +2,7 @@ package org.fuchss.matrix.mensa.swka.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.fuchss.matrix.mensa.api.Meal
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 internal data class MealRaw(
@@ -15,6 +16,19 @@ internal data class MealRaw(
     @JsonProperty("price_4") val pricePupil: Double?,
     @JsonProperty("price_flag") val priceAdditive: Double?
 ) {
+
+    companion object {
+        fun toMeal(mealRawData: MealRaw): Meal = Meal(
+            mealRawData.meal(),
+            mealRawData.foodAdditiveNumbers!!,
+            mealRawData.priceStudent!!,
+            mealRawData.priceGuest!!,
+            mealRawData.priceEmployee!!,
+            mealRawData.pricePupil!!,
+            mealRawData.priceAdditive!!
+        )
+    }
+
     fun meal(): String {
         if (dish.isNullOrBlank()) {
             return name ?: ""
