@@ -15,7 +15,8 @@ import net.folivo.trixnity.core.model.events.Event
 import net.folivo.trixnity.core.model.events.m.room.RoomMessageEventContent
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
-import org.fuchss.matrix.mensa.request.MensaAPI
+import org.fuchss.matrix.mensa.api.MensaAPI
+import org.fuchss.matrix.mensa.swka.SWKAMensaAPI
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.Timer
@@ -23,7 +24,7 @@ import java.util.TimerTask
 import kotlin.random.Random
 
 private val logger: Logger = LoggerFactory.getLogger(MatrixBot::class.java)
-private var mensa = MensaAPI()
+private val mensa: MensaAPI = SWKAMensaAPI()
 
 fun main() {
     runBlocking {
@@ -128,7 +129,7 @@ private fun scheduleMensaMessages(matrixBot: MatrixBot, config: Config): Timer {
                 runBlocking {
                     logger.debug("Sending Mensa to Rooms (Scheduled) ...")
                     // Reinit Mensa API
-                    mensa = MensaAPI()
+                    mensa.reload()
 
                     for (roomId in config.subscriptions()) {
                         try {

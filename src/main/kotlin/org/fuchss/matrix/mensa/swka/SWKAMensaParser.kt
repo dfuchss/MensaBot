@@ -1,4 +1,4 @@
-package org.fuchss.matrix.mensa.request
+package org.fuchss.matrix.mensa.swka
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -7,15 +7,15 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.fuchss.matrix.mensa.data.Meal
-import org.fuchss.matrix.mensa.data.Mensa
-import org.fuchss.matrix.mensa.data.MensaLine
-import org.fuchss.matrix.mensa.request.dto.MealRaw
-import org.fuchss.matrix.mensa.request.dto.MensaRaw
+import org.fuchss.matrix.mensa.api.Meal
+import org.fuchss.matrix.mensa.api.Mensa
+import org.fuchss.matrix.mensa.api.MensaLine
+import org.fuchss.matrix.mensa.swka.dto.MealRaw
+import org.fuchss.matrix.mensa.swka.dto.MensaRaw
 
-internal class MensaParser {
+internal class SWKAMensaParser {
     private val orm = ObjectMapper().registerKotlinModule()
-    private val validMensas: List<MensaRaw> = orm.readValue(MensaParser::class.java.getResourceAsStream("/valid_mensa.json")!!)
+    private val validMensas: List<MensaRaw> = orm.readValue(SWKAMensaParser::class.java.getResourceAsStream("/valid_mensa.json")!!)
 
     fun parseMensa(mensaInfos: JsonNode): List<Mensa> {
         val mensaList: MutableList<Mensa> = mutableListOf()

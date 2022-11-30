@@ -1,6 +1,6 @@
-package org.fuchss.matrix.mensa.data
+package org.fuchss.matrix.mensa.api
 
-import org.fuchss.matrix.mensa.request.dto.MealRaw
+import org.fuchss.matrix.mensa.swka.dto.MealRaw
 
 data class Meal(
     val name: String,

@@ -1,10 +1,10 @@
-package org.fuchss.matrix.mensa.request.dto
+package org.fuchss.matrix.mensa.swka.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class MealRaw(
+internal data class MealRaw(
     @JsonProperty("nodata") val noMeal: Boolean?,
     @JsonProperty("meal") val name: String?,
     @JsonProperty("dish") val dish: String?,

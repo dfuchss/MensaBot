@@ -1,4 +1,4 @@
-package org.fuchss.matrix.mensa.data
+package org.fuchss.matrix.mensa.api
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
