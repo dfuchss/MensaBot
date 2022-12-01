@@ -1,4 +1,5 @@
 .idea
-config.json
+config*.json
+!config-sample.json
 *.iml
 target

@@ -99,15 +99,15 @@ private suspend fun printMensa(roomId: RoomId, matrixBot: MatrixBot) {
         response = "Kein Essen heute :("
     } else {
         for (mensa in mensas) {
-            response += "# ${mensa.name}\n"
+            if (mensas.size != 1) response += "## ${mensa.name}\n"
             for (l in mensa.mensaLinesAtDate() ?: listOf()) {
-                response += "## ${l.title}\n"
-                for (meal in l.meals) response += "* ${meal.name}\n"
+                response += "### ${l.title}\n"
+                for (meal in l.meals) response += "* ${meal.entry()}\n"
             }
         }
     }
 
-    matrixBot.room().sendMessage(roomId) { markdown(response) }
+    matrixBot.room().sendMessage(roomId) { markdown(response.trim()) }
 }
 
 private suspend fun subscribe(roomId: RoomId, matrixBot: MatrixBot, config: Config) {
