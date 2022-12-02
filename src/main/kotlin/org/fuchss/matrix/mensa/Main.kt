@@ -3,15 +3,21 @@ package org.fuchss.matrix.mensa
 import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Clock
+import net.folivo.trixnity.client.IMatrixClient
 import net.folivo.trixnity.client.MatrixClient
+import net.folivo.trixnity.client.getEventId
 import net.folivo.trixnity.client.getRoomId
+import net.folivo.trixnity.client.room
 import net.folivo.trixnity.client.room.message.MessageBuilder
 import net.folivo.trixnity.client.room.message.text
 import net.folivo.trixnity.client.store.repository.createInMemoryRepositoriesModule
 import net.folivo.trixnity.clientserverapi.model.authentication.IdentifierType
 import net.folivo.trixnity.core.model.RoomId
 import net.folivo.trixnity.core.model.events.Event
+import net.folivo.trixnity.core.model.events.m.room.EncryptedEventContent
 import net.folivo.trixnity.core.model.events.m.room.RoomMessageEventContent
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
@@ -22,6 +28,7 @@ import org.slf4j.LoggerFactory
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.random.Random
+import kotlin.time.Duration
 
 private val logger: Logger = LoggerFactory.getLogger(MatrixBot::class.java)
 private val mensa: MensaAPI = SWKAMensaAPI()
@@ -42,7 +49,8 @@ fun main() {
 
         val matrixBot = MatrixBot(matrixClient, config)
         // matrixBot.subscribeAllEvents { event -> println(event) }
-        matrixBot.subscribe { event -> handleTextMessage(event, matrixBot, config) }
+        matrixBot.subscribe { event -> handleTextMessage(event.getRoomId()!!, event.content, matrixBot, config) }
+        matrixBot.subscribe { event -> handleEncryptedTextMessage(event, matrixClient, matrixBot, config) }
 
         val timer = scheduleMensaMessages(matrixBot, config)
         matrixBot.startBlocking()
@@ -52,8 +60,22 @@ fun main() {
     }
 }
 
-private suspend fun handleTextMessage(event: Event<RoomMessageEventContent.TextMessageEventContent>, matrixBot: MatrixBot, config: Config) {
-    var message = event.content.body
+suspend fun handleEncryptedTextMessage(event: Event<EncryptedEventContent>, matrixClient: IMatrixClient, matrixBot: MatrixBot, config: Config) {
+    val timelineEvent = matrixClient.room.getTimelineEvent(event.getEventId()!!, event.getRoomId()!!, CoroutineScope(Dispatchers.Default))
+    val success = waitForEvent { timelineEvent.value?.content?.getOrNull() }
+    if (!success) {
+        logger.error("Cannot decrypt event $event within the given time ..")
+        return
+    }
+
+    val content = timelineEvent.value!!.content!!.getOrThrow()
+    if (content is RoomMessageEventContent.TextMessageEventContent) {
+        handleTextMessage(event.getRoomId()!!, content, matrixBot, config)
+    }
+}
+
+private suspend fun handleTextMessage(roomId: RoomId, content: RoomMessageEventContent.TextMessageEventContent, matrixBot: MatrixBot, config: Config) {
+    var message = content.body
     if (!message.startsWith("!${config.prefix}")) {
         return
     }
@@ -62,14 +84,14 @@ private suspend fun handleTextMessage(event: Event<RoomMessageEventContent.TextM
 
     when (message.split(Regex(" "), 2)[0]) {
         "quit" -> matrixBot.quit()
-        "help" -> help(event, matrixBot, config)
-        "name" -> changeUsername(event, matrixBot, message)
-        "show" -> printMensa(event.getRoomId()!!, matrixBot)
-        "subscribe" -> subscribe(event.getRoomId()!!, matrixBot, config)
+        "help" -> help(roomId, matrixBot, config)
+        "name" -> changeUsername(roomId, matrixBot, message)
+        "show" -> printMensa(roomId, matrixBot, false)
+        "subscribe" -> subscribe(roomId, matrixBot, config)
     }
 }
 
-private suspend fun help(event: Event<RoomMessageEventContent.TextMessageEventContent>, matrixBot: MatrixBot, config: Config) {
+private suspend fun help(roomId: RoomId, matrixBot: MatrixBot, config: Config) {
     val helpMessage = """
         This is the Mensa Bot. You can use the following commands:
         
@@ -80,23 +102,27 @@ private suspend fun help(event: Event<RoomMessageEventContent.TextMessageEventCo
         * `!${config.prefix} subscribe - shows instructions to subscribe for the channel`
     """.trimIndent()
 
-    matrixBot.room().sendMessage(event.getRoomId()!!) { markdown(helpMessage) }
+    matrixBot.room().sendMessage(roomId) { markdown(helpMessage) }
 }
 
-private suspend fun changeUsername(event: Event<RoomMessageEventContent.TextMessageEventContent>, matrixBot: MatrixBot, message: String) {
+private suspend fun changeUsername(roomId: RoomId, matrixBot: MatrixBot, message: String) {
     val newNameInRoom = message.substring("name".length).trim()
     if (newNameInRoom.isNotBlank()) {
-        matrixBot.renameInRoom(event.getRoomId()!!, newNameInRoom)
+        matrixBot.renameInRoom(roomId, newNameInRoom)
     }
 }
 
-private suspend fun printMensa(roomId: RoomId, matrixBot: MatrixBot) {
+private suspend fun printMensa(roomId: RoomId, matrixBot: MatrixBot, scheduled: Boolean) {
     logger.info("Sending Mensa to Room ${roomId.full}")
 
     val mensas = mensa.foodAtDate()
     var response = ""
     if (mensas.isEmpty() || mensas.all { mensa -> mensa.mensaLinesAtDate()?.isEmpty() != false }) {
-        response = "Kein Essen heute :("
+        if (!scheduled) {
+            response = "Kein Essen heute :("
+        } else {
+            logger.info("Skipping sending of mensa plan to $roomId as there will be no food today.")
+        }
     } else {
         for (mensa in mensas) {
             if (mensas.size != 1) response += "## ${mensa.name}\n"
@@ -106,8 +132,9 @@ private suspend fun printMensa(roomId: RoomId, matrixBot: MatrixBot) {
             }
         }
     }
-
-    matrixBot.room().sendMessage(roomId) { markdown(response.trim()) }
+    if (response.isNotBlank()) {
+        matrixBot.room().sendMessage(roomId) { markdown(response.trim()) }
+    }
 }
 
 private suspend fun subscribe(roomId: RoomId, matrixBot: MatrixBot, config: Config) {
@@ -133,7 +160,7 @@ private fun scheduleMensaMessages(matrixBot: MatrixBot, config: Config): Timer {
 
                     for (roomId in config.subscriptions()) {
                         try {
-                            printMensa(roomId, matrixBot)
+                            printMensa(roomId, matrixBot, true)
                         } catch (e: Exception) {
                             logger.error(e.message, e)
                         }
@@ -151,4 +178,16 @@ private fun MessageBuilder.markdown(markdown: String) {
     val document = Parser.builder().build().parse(markdown)
     val html = HtmlRenderer.builder().build().render(document)
     text(markdown, format = "org.matrix.custom.html", formattedBody = html)
+}
+
+private suspend fun waitForEvent(maxTimeToWait: Duration = Duration.parse("5s"), waitStepInMS: Long = 1000, getter: () -> Any?): Boolean {
+    val start = Clock.System.now()
+    while (Clock.System.now() - start < maxTimeToWait) {
+        val ready = getter()
+        if (ready != null) {
+            return true
+        }
+        delay(waitStepInMS)
+    }
+    return false
 }
