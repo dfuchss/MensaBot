@@ -107,18 +107,18 @@ private suspend fun changeUsername(roomId: RoomId, matrixBot: MatrixBot, message
 private suspend fun printMensa(roomId: RoomId, matrixBot: MatrixBot, scheduled: Boolean) {
     logger.info("Sending Mensa to Room ${roomId.full}")
 
-    val mensas = mensa.foodAtDate()
+    val mensaToday = mensa.foodAtDate()
     var response = ""
-    if (mensas.isEmpty() || mensas.all { mensa -> mensa.mensaLinesAtDate()?.isEmpty() != false }) {
+    if (mensaToday.isEmpty() || mensaToday.all { (_, lines) -> lines.isEmpty() }) {
         if (!scheduled) {
             response = "Kein Essen heute :("
         } else {
             logger.info("Skipping sending of mensa plan to $roomId as there will be no food today.")
         }
     } else {
-        for (mensa in mensas) {
-            if (mensas.size != 1) response += "## ${mensa.name}\n"
-            for (l in mensa.mensaLinesAtDate() ?: listOf()) {
+        for ((mensa, lines) in mensaToday) {
+            if (mensaToday.size != 1) response += "## ${mensa.name}\n"
+            for (l in lines) {
                 response += "### ${l.title}\n"
                 for (meal in l.meals) response += "* ${meal.entry()}\n"
             }
@@ -147,7 +147,6 @@ private fun scheduleMensaMessages(matrixBot: MatrixBot, config: Config): Timer {
             override fun run() {
                 runBlocking {
                     logger.debug("Sending Mensa to Rooms (Scheduled) ...")
-                    // Reinit Mensa API
                     mensa.reload()
 
                     for (roomId in config.subscriptions()) {

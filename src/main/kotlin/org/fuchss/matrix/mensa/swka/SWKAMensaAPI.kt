@@ -9,16 +9,24 @@ import io.ktor.serialization.jackson.jackson
 import kotlinx.datetime.LocalDate
 import org.fuchss.matrix.mensa.api.Mensa
 import org.fuchss.matrix.mensa.api.MensaAPI
+import org.fuchss.matrix.mensa.api.MensaLine
 
 internal class SWKAMensaAPI : MensaAPI {
     private val mensaParser = SWKAMensaParser()
     private lateinit var mensa: List<Mensa>
 
-    override suspend fun foodAtDate(date: LocalDate): List<Mensa> {
+    override suspend fun foodAtDate(date: LocalDate): Map<Mensa, List<MensaLine>> {
         if (!this::mensa.isInitialized) {
             mensa = request()
         }
-        return mensa.map { m -> m to (m.mensaLines[date]?.toList() ?: listOf()) }.filter { (_, lines) -> lines.isNotEmpty() }.map { (m, f) -> m.mensaOnlyWithLines(date, f) }
+
+        val result = mutableMapOf<Mensa, List<MensaLine>>()
+        for (m in mensa) {
+            val meals = m.mensaLines[date] ?: continue
+            result[m] = meals
+        }
+
+        return result
     }
 
     override suspend fun reload() {
@@ -26,7 +34,7 @@ internal class SWKAMensaAPI : MensaAPI {
     }
 
     private suspend fun request(): List<Mensa> {
-        val client = HttpClient() { install(ContentNegotiation) { jackson() } }
+        val client = HttpClient { install(ContentNegotiation) { jackson() } }
         val response = client.request("https://www.sw-ka.de/json_interface/canteen") {
             method = HttpMethod.Get
         }

@@ -6,6 +6,6 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 
 interface MensaAPI {
-    suspend fun foodAtDate(date: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())): List<Mensa>
+    suspend fun foodAtDate(date: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())): Map<Mensa, List<MensaLine>>
     suspend fun reload()
 }

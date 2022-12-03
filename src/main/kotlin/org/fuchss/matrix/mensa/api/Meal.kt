@@ -33,11 +33,11 @@ data class Meal(
     }
 
     private fun addVegetarian(emojis: MutableList<String>) {
-        if (vegetarian) emojis.add(":seedling:".toEmoji())
+        if (vegetarian) emojis.add(":carrot:".toEmoji())
     }
 
     private fun addVegan(emojis: MutableList<String>) {
-        if (vegan) emojis.add(":sunflower:".toEmoji())
+        if (vegan) emojis.add(":ear_of_rice:".toEmoji())
     }
 
     private fun addCow(emojis: MutableList<String>) {
