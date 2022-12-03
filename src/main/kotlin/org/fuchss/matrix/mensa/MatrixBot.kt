@@ -1,9 +1,7 @@
 package org.fuchss.matrix.mensa
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.datetime.Clock
@@ -70,11 +68,14 @@ class MatrixBot(private val matrixClient: MatrixClient, private val config: Conf
     private fun isValidEventFromAdmin(event: Event<*>, listenNonAdmins: Boolean): Boolean {
         if (!config.isAdmin(event.getSender()) && !listenNonAdmins) return false
         if (event.getSender() == matrixClient.userId) return false
-        if (event.getOriginTimestamp() == null || Instant.fromEpochMilliseconds(event.getOriginTimestamp()!!) < runningTimestamp) return false
+        val timeOfOrigin = event.getOriginTimestamp()
+        if (timeOfOrigin == null || Instant.fromEpochMilliseconds(timeOfOrigin) < runningTimestamp) return false
         return true
     }
 
     private suspend fun handleJoinEvent(event: Event<MemberEventContent>) {
+        val roomId = event.getRoomId() ?: return
+
         if (!config.isAdmin(event.getSender())) return
 
         if (event.content.membership != Membership.JOIN) {
@@ -82,16 +83,11 @@ class MatrixBot(private val matrixClient: MatrixClient, private val config: Conf
             return
         }
 
-        val room = matrixClient.room.getById(event.getRoomId()!!).stateIn(CoroutineScope(Dispatchers.Default)).value ?: return
+        val room = matrixClient.room.getById(roomId).first() ?: return
         if (room.membership != Membership.INVITE) return
 
-        if (room.encryptionAlgorithm != null) {
-            logger.error("Cannot join room $room because it's encrypted")
-            return
-        }
-
-        logger.info("Joining Room: ${event.getRoomId()}")
-        matrixClient.api.rooms.joinRoom(event.getRoomId()!!)
+        logger.info("Joining Room: $roomId")
+        matrixClient.api.rooms.joinRoom(roomId)
     }
 
     suspend fun renameInRoom(roomId: RoomId, newNameInRoom: String) {

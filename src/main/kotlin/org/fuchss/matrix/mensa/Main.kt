@@ -56,7 +56,7 @@ fun main() {
 
         val matrixBot = MatrixBot(matrixClient, config)
         // matrixBot.subscribeAllEvents { event -> println(event) }
-        matrixBot.subscribe { event -> handleTextMessage(event.getRoomId()!!, event.content, matrixBot, config) }
+        matrixBot.subscribe { event -> handleTextMessage(event.getRoomId(), event.content, matrixBot, config) }
         matrixBot.subscribe { event -> handleEncryptedTextMessage(event, matrixClient, matrixBot, config) }
 
         val timer = scheduleMensaMessages(matrixBot, config)
@@ -67,7 +67,11 @@ fun main() {
     }
 }
 
-private suspend fun handleTextMessage(roomId: RoomId, content: RoomMessageEventContent.TextMessageEventContent, matrixBot: MatrixBot, config: Config) {
+private suspend fun handleTextMessage(roomId: RoomId?, content: RoomMessageEventContent.TextMessageEventContent, matrixBot: MatrixBot, config: Config) {
+    if (roomId == null) {
+        return
+    }
+
     var message = content.body
     if (!message.startsWith("!${config.prefix}")) {
         return
