@@ -1,6 +1,9 @@
 package org.fuchss.matrix.mensa
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.datetime.Clock
@@ -79,7 +82,7 @@ class MatrixBot(private val matrixClient: MatrixClient, private val config: Conf
             return
         }
 
-        val room = matrixClient.room.getById(event.getRoomId()!!).toStateFlow(null) { it != null }.value ?: return
+        val room = matrixClient.room.getById(event.getRoomId()!!).stateIn(CoroutineScope(Dispatchers.Default)).value ?: return
         if (room.membership != Membership.INVITE) return
 
         if (room.encryptionAlgorithm != null) {

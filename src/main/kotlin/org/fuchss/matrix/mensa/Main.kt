@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import net.folivo.trixnity.client.MatrixClient
@@ -175,7 +176,7 @@ private fun MessageBuilder.markdown(markdown: String) {
 // Handle Encrypted Messages ..
 
 private suspend fun handleEncryptedTextMessage(event: Event<EncryptedEventContent>, matrixClient: MatrixClient, matrixBot: MatrixBot, config: Config) {
-    val timelineEvent: StateFlow<TimelineEvent?> = matrixClient.room.getTimelineEvent(event.getEventId()!!, event.getRoomId()!!).toStateFlow(null) { it?.content?.getOrNull() != null }
+    val timelineEvent: StateFlow<TimelineEvent?> = matrixClient.room.getTimelineEvent(event.getEventId()!!, event.getRoomId()!!).stateIn(CoroutineScope(Dispatchers.Default))
     val success = waitForEvent { timelineEvent.value?.content?.getOrNull() }
     if (!success) {
         logger.error("Cannot decrypt event $event within the given time ..")
