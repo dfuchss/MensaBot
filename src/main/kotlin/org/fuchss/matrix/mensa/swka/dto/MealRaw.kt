@@ -26,20 +26,26 @@ internal data class MealRaw(
 ) {
 
     companion object {
-        fun toMeal(mealRawData: MealRaw): Meal = Meal(
-            mealRawData.meal(),
-            mealRawData.foodAdditiveNumbers!!,
-            mealRawData.priceStudent!!,
-            mealRawData.priceGuest!!,
-            mealRawData.priceEmployee!!,
-            mealRawData.pricePupil!!,
-            mealRawData.priceAdditive!!,
-            mealRawData.fish!!,
-            mealRawData.pork!! || mealRawData.porkAw!!,
-            mealRawData.cow!! || mealRawData.cowAw!!,
-            mealRawData.vegan!!,
-            mealRawData.vegetarian!!
-        )
+        fun toMeal(mealRawData: MealRaw): Meal {
+            if (mealRawData.noMeal != null && mealRawData.noMeal) {
+                error("You cannot convert a \"no-meal\" meal. Constraints do not hold!")
+            }
+
+            return Meal(
+                mealRawData.meal(),
+                mealRawData.foodAdditiveNumbers!!,
+                mealRawData.priceStudent!!,
+                mealRawData.priceGuest!!,
+                mealRawData.priceEmployee!!,
+                mealRawData.pricePupil!!,
+                mealRawData.priceAdditive!!,
+                mealRawData.fish!!,
+                mealRawData.pork!! || mealRawData.porkAw!!,
+                mealRawData.cow!! || mealRawData.cowAw!!,
+                mealRawData.vegan!!,
+                mealRawData.vegetarian!!
+            )
+        }
     }
 
     fun meal(): String {

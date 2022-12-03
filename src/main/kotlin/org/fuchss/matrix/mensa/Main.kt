@@ -3,11 +3,8 @@ package org.fuchss.matrix.mensa
 import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.Clock
 import net.folivo.trixnity.client.MatrixClient
 import net.folivo.trixnity.client.getEventId
 import net.folivo.trixnity.client.getRoomId
@@ -16,7 +13,6 @@ import net.folivo.trixnity.client.media.okio.OkioMediaStore
 import net.folivo.trixnity.client.room
 import net.folivo.trixnity.client.room.message.MessageBuilder
 import net.folivo.trixnity.client.room.message.text
-import net.folivo.trixnity.client.store.TimelineEvent
 import net.folivo.trixnity.client.store.repository.createInMemoryRepositoriesModule
 import net.folivo.trixnity.clientserverapi.model.authentication.IdentifierType
 import net.folivo.trixnity.core.model.RoomId
@@ -34,7 +30,6 @@ import java.io.File
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.random.Random
-import kotlin.time.Duration
 
 private val logger: Logger = LoggerFactory.getLogger(MatrixBot::class.java)
 private val mensa: MensaAPI = SWKAMensaAPI()
@@ -177,30 +172,21 @@ private fun MessageBuilder.markdown(markdown: String) {
     text(markdown, format = "org.matrix.custom.html", formattedBody = html)
 }
 
-// Handle Encrypted Messages ..
-
 private suspend fun handleEncryptedTextMessage(event: Event<EncryptedEventContent>, matrixClient: MatrixClient, matrixBot: MatrixBot, config: Config) {
-    val timelineEvent: StateFlow<TimelineEvent?> = matrixClient.room.getTimelineEvent(event.getEventId()!!, event.getRoomId()!!).stateIn(CoroutineScope(Dispatchers.Default))
-    val success = waitForEvent { timelineEvent.value?.content?.getOrNull() }
-    if (!success) {
+    val roomId = event.getRoomId() ?: return
+    val eventId = event.getEventId() ?: return
+
+    logger.debug("Waiting for decryption of $event ..")
+    val decryptedEvent = matrixClient.room.getTimelineEvent(eventId, roomId).first { it?.content != null }
+    logger.debug("Decryption of $event was successful")
+
+    if (decryptedEvent == null) {
         logger.error("Cannot decrypt event $event within the given time ..")
         return
     }
 
-    val content = timelineEvent.value!!.content!!.getOrThrow()
+    val content = decryptedEvent.content?.getOrNull() ?: return
     if (content is RoomMessageEventContent.TextMessageEventContent) {
-        handleTextMessage(event.getRoomId()!!, content, matrixBot, config)
+        handleTextMessage(roomId, content, matrixBot, config)
     }
-}
-
-private suspend fun waitForEvent(maxTimeToWait: Duration = Duration.parse("5s"), waitStepInMS: Long = 1000, getter: () -> Any?): Boolean {
-    val start = Clock.System.now()
-    while (Clock.System.now() - start < maxTimeToWait) {
-        val ready = getter()
-        if (ready != null) {
-            return true
-        }
-        delay(waitStepInMS)
-    }
-    return false
 }
