@@ -4,27 +4,32 @@ import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
-import net.folivo.trixnity.client.IMatrixClient
 import net.folivo.trixnity.client.MatrixClient
 import net.folivo.trixnity.client.getEventId
 import net.folivo.trixnity.client.getRoomId
+import net.folivo.trixnity.client.login
+import net.folivo.trixnity.client.media.okio.OkioMediaStore
 import net.folivo.trixnity.client.room
 import net.folivo.trixnity.client.room.message.MessageBuilder
 import net.folivo.trixnity.client.room.message.text
+import net.folivo.trixnity.client.store.TimelineEvent
 import net.folivo.trixnity.client.store.repository.createInMemoryRepositoriesModule
 import net.folivo.trixnity.clientserverapi.model.authentication.IdentifierType
 import net.folivo.trixnity.core.model.RoomId
 import net.folivo.trixnity.core.model.events.Event
 import net.folivo.trixnity.core.model.events.m.room.EncryptedEventContent
 import net.folivo.trixnity.core.model.events.m.room.RoomMessageEventContent
+import okio.Path.Companion.toOkioPath
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.fuchss.matrix.mensa.api.MensaAPI
 import org.fuchss.matrix.mensa.swka.SWKAMensaAPI
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.random.Random
@@ -44,7 +49,8 @@ fun main() {
             config.password,
             initialDeviceDisplayName = "${MatrixBot::class.java.`package`.name}-${Random.Default.nextInt()}",
             repositoriesModule = createInMemoryRepositoriesModule(),
-            scope = scope
+            scope = scope,
+            mediaStore = OkioMediaStore(File("media").toOkioPath())
         ).getOrThrow()
 
         val matrixBot = MatrixBot(matrixClient, config)
@@ -57,20 +63,6 @@ fun main() {
 
         // After Shutdown
         timer.cancel()
-    }
-}
-
-suspend fun handleEncryptedTextMessage(event: Event<EncryptedEventContent>, matrixClient: IMatrixClient, matrixBot: MatrixBot, config: Config) {
-    val timelineEvent = matrixClient.room.getTimelineEvent(event.getEventId()!!, event.getRoomId()!!, CoroutineScope(Dispatchers.Default))
-    val success = waitForEvent { timelineEvent.value?.content?.getOrNull() }
-    if (!success) {
-        logger.error("Cannot decrypt event $event within the given time ..")
-        return
-    }
-
-    val content = timelineEvent.value!!.content!!.getOrThrow()
-    if (content is RoomMessageEventContent.TextMessageEventContent) {
-        handleTextMessage(event.getRoomId()!!, content, matrixBot, config)
     }
 }
 
@@ -178,6 +170,22 @@ private fun MessageBuilder.markdown(markdown: String) {
     val document = Parser.builder().build().parse(markdown)
     val html = HtmlRenderer.builder().build().render(document)
     text(markdown, format = "org.matrix.custom.html", formattedBody = html)
+}
+
+// Handle Encrypted Messages ..
+
+private suspend fun handleEncryptedTextMessage(event: Event<EncryptedEventContent>, matrixClient: MatrixClient, matrixBot: MatrixBot, config: Config) {
+    val timelineEvent: StateFlow<TimelineEvent?> = matrixClient.room.getTimelineEvent(event.getEventId()!!, event.getRoomId()!!).toStateFlow(null) { it?.content?.getOrNull() != null }
+    val success = waitForEvent { timelineEvent.value?.content?.getOrNull() }
+    if (!success) {
+        logger.error("Cannot decrypt event $event within the given time ..")
+        return
+    }
+
+    val content = timelineEvent.value!!.content!!.getOrThrow()
+    if (content is RoomMessageEventContent.TextMessageEventContent) {
+        handleTextMessage(event.getRoomId()!!, content, matrixBot, config)
+    }
 }
 
 private suspend fun waitForEvent(maxTimeToWait: Duration = Duration.parse("5s"), waitStepInMS: Long = 1000, getter: () -> Any?): Boolean {

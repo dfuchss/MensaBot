@@ -5,7 +5,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import net.folivo.trixnity.client.IMatrixClient
+import net.folivo.trixnity.client.MatrixClient
 import net.folivo.trixnity.client.getOriginTimestamp
 import net.folivo.trixnity.client.getRoomId
 import net.folivo.trixnity.client.getSender
@@ -21,7 +21,7 @@ import net.folivo.trixnity.core.subscribe
 import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
 
-class MatrixBot(private val matrixClient: IMatrixClient, private val config: Config) {
+class MatrixBot(private val matrixClient: MatrixClient, private val config: Config) {
 
     private val logger = LoggerFactory.getLogger(MatrixBot::class.java)
 
@@ -55,10 +55,6 @@ class MatrixBot(private val matrixClient: IMatrixClient, private val config: Con
 
     fun room() = matrixClient.room
 
-    fun subscribeAllEvents(subscriber: EventSubscriber<EventContent>) = matrixClient.api.sync.subscribeAllEvents { event ->
-        if (isValidEventFromAdmin(event, true)) subscriber(event)
-    }
-
     fun <T : EventContent> subscribe(clazz: KClass<T>, subscriber: EventSubscriber<T>, listenNonAdmins: Boolean = false) {
         matrixClient.api.sync.subscribe(clazz) { event -> if (isValidEventFromAdmin(event, listenNonAdmins)) subscriber(event) }
     }
@@ -83,7 +79,7 @@ class MatrixBot(private val matrixClient: IMatrixClient, private val config: Con
             return
         }
 
-        val room = matrixClient.room.getById(event.getRoomId()!!).value ?: return
+        val room = matrixClient.room.getById(event.getRoomId()!!).toStateFlow(null) { it != null }.value ?: return
         if (room.membership != Membership.INVITE) return
 
         if (room.encryptionAlgorithm != null) {
