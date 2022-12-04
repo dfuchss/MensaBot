@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.fuchss.matrix.mensa.api.Mensa
@@ -23,20 +24,22 @@ internal class SWKAMensaParser {
                 continue
             }
 
-            val mensa = Mensa(validMensa.id, validMensa.name)
-            val dateXLine = mensaInfos.get(mensa.id).jsonToObject<Map<Int, Map<String, List<MealRaw>>>>()
+            val dateXLine = mensaInfos.get(validMensa.id).jsonToObject<Map<Int, Map<String, List<MealRaw>>>>()
+            val mensaLines = mutableMapOf<LocalDate, MutableList<MensaLine>>()
+
             for ((date, lineData) in dateXLine) {
-                parseMensaLines(mensa, date, validMensa.lineNames, lineData)
+                parseMensaLines(mensaLines, date, validMensa.lineNames, lineData)
             }
 
-            if (mensa.mensaLines.isNotEmpty()) {
+            if (mensaLines.isNotEmpty()) {
+                val mensa = Mensa(validMensa.id, validMensa.name, mensaLines)
                 mensaList.add(mensa)
             }
         }
         return mensaList
     }
 
-    private fun parseMensaLines(mensa: Mensa, epochSeconds: Int, lineNames: Map<String, String>, lineData: Map<String, List<MealRaw>>) {
+    private fun parseMensaLines(targetMensaLines: MutableMap<LocalDate, MutableList<MensaLine>>, epochSeconds: Int, lineNames: Map<String, String>, lineData: Map<String, List<MealRaw>>) {
         val mensaLines = mutableListOf<MensaLine>()
         for ((lineId, lineName) in lineNames) {
             if (lineId !in lineData.keys) {
@@ -54,7 +57,7 @@ internal class SWKAMensaParser {
         }
 
         val localDate = Instant.fromEpochSeconds(epochSeconds.toLong()).toLocalDateTime(TimeZone.of("Europe/Berlin")).date
-        mensa.mensaLines.getOrPut(localDate) { mutableListOf() } += mensaLines
+        targetMensaLines.getOrPut(localDate) { mutableListOf() } += mensaLines
     }
 
     private inline fun <reified T> JsonNode.jsonToObject(): T {

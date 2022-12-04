@@ -136,7 +136,7 @@ private suspend fun printMensa(roomId: RoomId, matrixBot: MatrixBot, scheduled: 
         for ((mensa, lines) in mensaToday) {
             if (mensaToday.size != 1) response += "## ${mensa.name}\n"
             for (l in lines) {
-                response += "### ${l.title}\n"
+                response += "### ${l.name}\n"
                 for (meal in l.meals) response += "* ${meal.entry()}\n"
             }
         }
@@ -176,7 +176,7 @@ private fun scheduleMensaMessages(matrixBot: MatrixBot, config: Config): Timer {
                 }
             }
         },
-        config.nextTimer(),
+        config.nextReminder(),
         1.days.inWholeMilliseconds
     )
     return timer

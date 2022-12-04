@@ -1,3 +1,8 @@
 package org.fuchss.matrix.mensa.api
 
-data class MensaLine(val title: String, val meals: List<Meal>)
+/**
+ * This class defines a mensa line that serves food.
+ * @param[name] the name of the line
+ * @param[meals] the food the line serves
+ */
+data class MensaLine(val name: String, val meals: List<Meal>)

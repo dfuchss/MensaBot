@@ -14,7 +14,6 @@ internal data class MealRaw(
     @JsonProperty("price_2") val priceGuest: Double?,
     @JsonProperty("price_3") val priceEmployee: Double?,
     @JsonProperty("price_4") val pricePupil: Double?,
-    @JsonProperty("price_flag") val priceAdditive: Double?,
 
     @JsonProperty("fish") val fish: Boolean?,
     @JsonProperty("pork") val pork: Boolean?,
@@ -38,7 +37,6 @@ internal data class MealRaw(
                 mealRawData.priceGuest!!,
                 mealRawData.priceEmployee!!,
                 mealRawData.pricePupil!!,
-                mealRawData.priceAdditive!!,
                 mealRawData.fish!!,
                 mealRawData.pork!! || mealRawData.porkAw!!,
                 mealRawData.cow!! || mealRawData.cowAw!!,

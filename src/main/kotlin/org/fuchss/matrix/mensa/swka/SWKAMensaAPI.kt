@@ -11,6 +11,9 @@ import org.fuchss.matrix.mensa.api.Mensa
 import org.fuchss.matrix.mensa.api.MensaAPI
 import org.fuchss.matrix.mensa.api.MensaLine
 
+/**
+ * One implementation of [MensaAPI] for www.sw-ka.de .
+ */
 internal class SWKAMensaAPI : MensaAPI {
     private val mensaParser = SWKAMensaParser()
     private lateinit var mensa: List<Mensa>
