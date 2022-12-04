@@ -49,9 +49,9 @@ internal data class MealRaw(
     }
 
     fun meal(): String {
-        if (dish.isNullOrBlank()) {
-            return name ?: ""
-        }
-        return ((name ?: "") + " $dish").trim()
+        val realName = name ?: "Unknown Meal"
+        val realDish = dish ?: ""
+
+        return "$realName $realDish".trim()
     }
 }

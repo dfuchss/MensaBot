@@ -1,7 +1,6 @@
 package org.fuchss.matrix.mensa
 
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.datetime.Clock
@@ -83,7 +82,7 @@ class MatrixBot(private val matrixClient: MatrixClient, private val config: Conf
             return
         }
 
-        val room = matrixClient.room.getById(roomId).first() ?: return
+        val room = matrixClient.room.getById(roomId).firstWithTimeout { it != null } ?: return
         if (room.membership != Membership.INVITE) return
 
         logger.info("Joining Room: $roomId")
