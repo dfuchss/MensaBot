@@ -12,6 +12,12 @@ Additionally, you can use commands to request the listing directly.
 
 ![Functions](.docs/imgs/functions.png)
 
+### Supported APIs
+This bot aims to support multiple mensa APIs. For details about the implementation, take a look at [Development](#development).
+
+Currently the bot supports the following mensa:
+* [Studierendenwerk Karlsruhe](https://www.sw-ka.de/en/hochschulgastronomie/speiseplan/)
+
 ## Setup
 
 1. Get a matrix account for the bot (e.g., on your own homeserver or on `matrix.org`)
