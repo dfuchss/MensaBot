@@ -112,14 +112,14 @@ class MatrixBot(private val matrixClient: MatrixClient, private val config: Conf
         if (!config.isAdmin(event.getSender())) return
 
         if (event.content.membership != Membership.JOIN) {
-            logger.info("Got Membership Event: $event")
+            logger.debug("Got Membership Event: $event")
             return
         }
 
         val room = matrixClient.room.getById(roomId).firstWithTimeout { it != null } ?: return
         if (room.membership != Membership.INVITE) return
 
-        logger.info("Joining Room: $roomId")
+        logger.info("Joining Room: $roomId by invitation of ${event.getSender()?.full ?: "Unknown User"}")
         matrixClient.api.rooms.joinRoom(roomId)
     }
 

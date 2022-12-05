@@ -17,9 +17,9 @@ internal data class MealRaw(
 
     @JsonProperty("fish") val fish: Boolean?,
     @JsonProperty("pork") val pork: Boolean?,
-    @JsonProperty("pork_aw") val porkAw: Boolean?,
+    @JsonProperty("pork_aw") val porkAw: Boolean?, // Pork Animal Welfare
     @JsonProperty("cow") val cow: Boolean?,
-    @JsonProperty("cow_aw") val cowAw: Boolean?,
+    @JsonProperty("cow_aw") val cowAw: Boolean?, // Cow Animal Welfare
     @JsonProperty("vegan") val vegan: Boolean?,
     @JsonProperty("veg") val vegetarian: Boolean?
 ) {
