@@ -3,4 +3,5 @@ config*.json
 !config-sample.json
 *.iml
 target
+docker-compose.yml
 media
