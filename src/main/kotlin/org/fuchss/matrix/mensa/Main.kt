@@ -37,12 +37,12 @@ fun main() {
 
         val matrixClient = MatrixClient.login(
             baseUrl = Url(config.baseUrl),
-            IdentifierType.User(config.username),
-            config.password,
-            initialDeviceDisplayName = "${MatrixBot::class.java.`package`.name}-${Random.Default.nextInt()}",
+            identifier = IdentifierType.User(config.username),
+            passwordOrToken = config.password,
             repositoriesModule = createInMemoryRepositoriesModule(),
+            mediaStore = OkioMediaStore(File("media").toOkioPath()),
             scope = scope,
-            mediaStore = OkioMediaStore(File("media").toOkioPath())
+            initialDeviceDisplayName = "${MatrixBot::class.java.`package`.name}-${Random.Default.nextInt()}",
         ).getOrThrow()
 
         val matrixBot = MatrixBot(matrixClient, config)
