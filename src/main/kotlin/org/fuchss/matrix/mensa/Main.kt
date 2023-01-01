@@ -42,7 +42,7 @@ fun main() {
             repositoriesModule = createInMemoryRepositoriesModule(),
             mediaStore = OkioMediaStore(File("media").toOkioPath()),
             scope = scope,
-            initialDeviceDisplayName = "${MatrixBot::class.java.`package`.name}-${Random.Default.nextInt()}",
+            initialDeviceDisplayName = "${MatrixBot::class.java.`package`.name}-${Random.Default.nextInt()}"
         ).getOrThrow()
 
         val matrixBot = MatrixBot(matrixClient, config)
