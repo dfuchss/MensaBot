@@ -13,6 +13,8 @@ jobs:
       contents: write
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - name: Create Changelog
       shell: bash
       run: |
