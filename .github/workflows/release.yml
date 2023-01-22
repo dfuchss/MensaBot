@@ -13,6 +13,17 @@ jobs:
       contents: write
     steps:
     - uses: actions/checkout@v3
-    - uses: ncipollo/release-action@v1
+    - name: Create Changelog
+      shell: bash
+      run: |
+        DIFF=$(git log $(git tag --sort=-creatordate | sed '2q;d')..HEAD --oneline)
+        if [ -z "$DIFF" ]; then
+          echo "Defaulting to full log"
+          DIFF=$(git log --oneline)
+        fi
+        echo "# Commits since last release" > CHANGELOG.txt
+        echo "$DIFF" | sed 's/^/* /' | sed '/Auto-Update Depedencies/{s/Updated/\n\t* Updated/g}' >> CHANGELOG.txt
+    - uses: softprops/action-gh-release@v1
       with:
+        body_path: CHANGELOG.txt
         generateReleaseNotes: true
