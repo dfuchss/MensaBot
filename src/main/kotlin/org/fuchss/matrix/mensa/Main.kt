@@ -38,7 +38,7 @@ fun main() {
         val matrixClient = MatrixClient.login(
             baseUrl = Url(config.baseUrl),
             identifier = IdentifierType.User(config.username),
-            passwordOrToken = config.password,
+            password = config.password,
             repositoriesModule = createInMemoryRepositoriesModule(),
             mediaStore = OkioMediaStore(File("media").toOkioPath()),
             scope = scope,
@@ -63,7 +63,7 @@ private suspend fun handleEncryptedTextMessage(event: Event<EncryptedEventConten
     val eventId = event.getEventId() ?: return
 
     logger.debug("Waiting for decryption of $event ..")
-    val decryptedEvent = matrixClient.room.getTimelineEvent(eventId, roomId).firstWithTimeout { it?.content != null }
+    val decryptedEvent = matrixClient.room.getTimelineEvent(roomId, eventId).firstWithTimeout { it?.content != null }
     if (decryptedEvent != null) {
         logger.debug("Decryption of $event was successful")
     }
