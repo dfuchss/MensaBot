@@ -32,16 +32,16 @@ internal data class MealRaw(
 
             return Meal(
                 mealRawData.meal(),
-                mealRawData.foodAdditiveNumbers!!,
-                mealRawData.priceStudent!!,
-                mealRawData.priceGuest!!,
-                mealRawData.priceEmployee!!,
-                mealRawData.pricePupil!!,
-                mealRawData.fish!!,
-                mealRawData.pork!! || mealRawData.porkAw!!,
-                mealRawData.cow!! || mealRawData.cowAw!!,
-                mealRawData.vegan!!,
-                mealRawData.vegetarian!!
+                mealRawData.foodAdditiveNumbers ?: emptyList(),
+                mealRawData.priceStudent ?: Double.NaN,
+                mealRawData.priceGuest ?: Double.NaN,
+                mealRawData.priceEmployee ?: Double.NaN,
+                mealRawData.pricePupil ?: Double.NaN,
+                mealRawData.fish ?: false,
+                (mealRawData.pork ?: false) || (mealRawData.porkAw ?: false),
+                (mealRawData.cow ?: false) || (mealRawData.cowAw ?: false),
+                mealRawData.vegan ?: false,
+                mealRawData.vegetarian ?: false
             )
         }
     }
