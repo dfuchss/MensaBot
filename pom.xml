@@ -241,7 +241,7 @@
                             <groupId>org.jetbrains.kotlin</groupId>
                             <ignoreVersion>
                                 <type>regex</type>
-                                <version>.+-(alpha|Alpha|beta|Beta).*</version>
+                                <version>.+-(alpha|Alpha|beta|Beta|RC).*</version>
                             </ignoreVersion>
                         </rule>
                     </ruleSet>
