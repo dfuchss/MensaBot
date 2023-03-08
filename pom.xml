@@ -29,7 +29,7 @@
         <kotlin.code.style>official</kotlin.code.style>
         <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
 
-        <kotlin.version>1.8.10</kotlin.version>
+        <kotlin.version>1.8.20-RC</kotlin.version>
         <ktor.version>2.2.4</ktor.version>
         <spotless.version>2.28.0</spotless.version>
         <jackson.version>2.14.2</jackson.version>
