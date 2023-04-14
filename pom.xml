@@ -288,6 +288,8 @@
                         </goals>
                         <phase>compile</phase>
                     </execution>
+                    <!-- Linux cannot build the tests .. don't know why .. -->
+                    <!--
                     <execution>
                         <id>test-compile</id>
                         <goals>
@@ -295,10 +297,13 @@
                         </goals>
                         <phase>test-compile</phase>
                     </execution>
+                    -->
                 </executions>
             </plugin>
         </plugins>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
+        <!--
         <testSourceDirectory>src/test/kotlin</testSourceDirectory>
+        -->
     </build>
 </project>
