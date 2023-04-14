@@ -42,4 +42,3 @@ Join our discussion at our matrix channel [#mensa-bot:fuchss.org](https://matrix
 
 * The basic functionality (commands) are located in [Main.kt](src/main/kotlin/org/fuchss/matrix/mensa/Main.kt). There you can also find the main method of the program.
 * Every mensa that shall be considered has to implement the `MensaAPI`. Currently, there is only one implementation for the [sw-ka.de interface](https://sw-ka.de).
-* The file `valid_mensa.json` defines the considered mensas and food lines from the sw-ka.de interface
