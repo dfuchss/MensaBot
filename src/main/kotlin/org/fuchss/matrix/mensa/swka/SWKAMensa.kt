@@ -102,7 +102,7 @@ class SWKAMensa : MensaAPI {
     }
 
     override suspend fun reload() {
-        TODO("Not yet implemented")
+        // No Caching .. therefore, no reload
     }
 
     internal fun numberOfWeek(date: LocalDate): Int {
