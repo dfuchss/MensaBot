@@ -101,10 +101,6 @@ class SWKAMensa : MensaAPI {
         return additionalInformation.replace("[", "").replace("]", "").split(",").filter { it.isNotBlank() }
     }
 
-    override suspend fun reload() {
-        // No Caching .. therefore, no reload
-    }
-
     internal fun numberOfWeek(date: LocalDate): Int {
         // See ISO 8601
         val startOfYear = LocalDate(date.year, 1, 1)

@@ -62,10 +62,10 @@ private suspend fun handleEncryptedTextMessage(event: Event<EncryptedEventConten
     val roomId = event.getRoomId() ?: return
     val eventId = event.getEventId() ?: return
 
-    logger.debug("Waiting for decryption of $event ..")
+    logger.debug("Waiting for decryption of {} ..", event)
     val decryptedEvent = matrixClient.room.getTimelineEvent(roomId, eventId).firstWithTimeout { it?.content != null }
     if (decryptedEvent != null) {
-        logger.debug("Decryption of $event was successful")
+        logger.debug("Decryption of {} was successful", event)
     }
 
     if (decryptedEvent == null) {
@@ -130,7 +130,7 @@ private suspend fun printMensa(roomId: RoomId, matrixBot: MatrixBot, scheduled: 
         if (!scheduled) {
             response = "Kein Essen heute :("
         } else {
-            logger.debug("Skipping sending of mensa plan to $roomId as there will be no food today.")
+            logger.debug("Skipping sending of mensa plan to {} as there will be no food today.", roomId)
         }
     } else {
         for ((mensa, lines) in mensaToday) {
@@ -164,7 +164,6 @@ private fun scheduleMensaMessages(matrixBot: MatrixBot, config: Config): Timer {
             override fun run() {
                 runBlocking {
                     logger.debug("Sending Mensa to Rooms (Scheduled) ...")
-                    mensa.reload()
 
                     for (roomId in config.subscriptions()) {
                         try {

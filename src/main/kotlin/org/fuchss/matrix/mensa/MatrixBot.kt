@@ -102,8 +102,7 @@ class MatrixBot(private val matrixClient: MatrixClient, private val config: Conf
         if (!config.isAdmin(event.getSender()) && !listenNonAdmins) return false
         if (event.getSender() == matrixClient.userId) return false
         val timeOfOrigin = event.getOriginTimestamp()
-        if (timeOfOrigin == null || Instant.fromEpochMilliseconds(timeOfOrigin) < runningTimestamp) return false
-        return true
+        return !(timeOfOrigin == null || Instant.fromEpochMilliseconds(timeOfOrigin) < runningTimestamp)
     }
 
     private suspend fun handleJoinEvent(event: Event<MemberEventContent>) {
@@ -112,7 +111,7 @@ class MatrixBot(private val matrixClient: MatrixClient, private val config: Conf
         if (!config.isAdmin(event.getSender())) return
 
         if (event.content.membership != Membership.JOIN) {
-            logger.debug("Got Membership Event: $event")
+            logger.debug("Got Membership Event: {}", event)
             return
         }
 
