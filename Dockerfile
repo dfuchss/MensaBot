@@ -7,7 +7,7 @@ RUN mvn clean package
 
 FROM eclipse-temurin:17-jre
 
-ENV RUN_IN_DOCKER true
+ENV RUN_IN_DOCKER=true
 ENV TZ=Europe/Berlin
 ENV CONFIG_PATH=/usr/src/bot/data/config.json
 
