@@ -19,7 +19,8 @@ import org.slf4j.LoggerFactory
 class SWKAMensa : MensaAPI {
     companion object {
         private val logger = LoggerFactory.getLogger(SWKAMensa::class.java)
-        private const val SWKA_WEBSITE = "https://www.sw-ka.de/de/hochschulgastronomie/speiseplan/mensa_adenauerring/?view=ok&c=adenauerring&STYLE=popup_plain&kw=%%%WoY%%%"
+        private const val SWKA_WEBSITE = //
+            "https://www.sw-ka.de/de/hochschulgastronomie/speiseplan/mensa_adenauerring/?view=ok&c=adenauerring&STYLE=popup_plain&kw=%%%WoY%%%"
         private val LINES_TO_CONSIDER = listOf("Linie ", "Schnitzel", "[pizza]werk Pizza", "[pizza]werk Pasta", "[kœri]werk")
     }
 
