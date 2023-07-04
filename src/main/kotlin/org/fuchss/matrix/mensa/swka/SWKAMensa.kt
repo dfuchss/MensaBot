@@ -113,7 +113,7 @@ class SWKAMensa : MensaAPI {
             5 -> startOfYear.plus(3, DateTimeUnit.DAY) // Friday -> Monday (next week)
             6 -> startOfYear.plus(2, DateTimeUnit.DAY) // Saturday -> Monday (next week)
             7 -> startOfYear.plus(1, DateTimeUnit.DAY) // Sunday -> Monday (next week)
-            else -> throw IllegalStateException("This should not happen")
+            else -> error("Impossible day of week")
         }
 
         val numberOfDays = date.toEpochDays() - firstDayOfWeekOne.toEpochDays()

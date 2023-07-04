@@ -46,7 +46,7 @@ fun main() {
         ).getOrThrow()
 
         val matrixBot = MatrixBot(matrixClient, config)
-        // matrixBot.subscribeAllEvents { event -> println(event) }
+
         matrixBot.subscribe { event -> handleTextMessage(event.getRoomId(), event.content, matrixBot, config) }
         matrixBot.subscribe { event -> handleEncryptedTextMessage(event, matrixClient, matrixBot, config) }
 
@@ -124,26 +124,28 @@ private suspend fun changeUsername(roomId: RoomId, matrixBot: MatrixBot, message
 private suspend fun printMensa(roomId: RoomId, matrixBot: MatrixBot, scheduled: Boolean) {
     logger.info("Sending Mensa to Room ${roomId.full}")
 
-    val mensaToday = mensa.foodAtDate()
+    val mensaToday = mensa.foodToday()
+    val noFood = mensaToday.isEmpty() || mensaToday.all { (_, lines) -> lines.isEmpty() }
+
+    if (noFood && scheduled) {
+        logger.debug("Skipping sending of mensa plan to {} as there will be no food today.", roomId)
+        return
+    }
+
     var response = ""
-    if (mensaToday.isEmpty() || mensaToday.all { (_, lines) -> lines.isEmpty() }) {
-        if (!scheduled) {
-            response = "Kein Essen heute :("
-        } else {
-            logger.debug("Skipping sending of mensa plan to {} as there will be no food today.", roomId)
-        }
-    } else {
-        for ((mensa, lines) in mensaToday) {
-            if (mensaToday.size != 1) response += "## ${mensa.name}\n"
-            for (l in lines) {
-                response += "### ${l.name}\n"
-                for (meal in l.meals) response += "* ${meal.entry()}\n"
-            }
+    for ((mensa, lines) in mensaToday) {
+        if (mensaToday.size != 1) response += "## ${mensa.name}\n"
+        for (l in lines) {
+            response += "### ${l.name}\n"
+            for (meal in l.meals) response += "* ${meal.entry()}\n"
         }
     }
-    if (response.isNotBlank()) {
-        matrixBot.room().sendMessage(roomId) { markdown(response.trim()) }
+
+    if (response.isBlank()) {
+        response = "Kein Essen heute :("
     }
+
+    matrixBot.room().sendMessage(roomId) { markdown(response.trim()) }
 }
 
 private suspend fun subscribe(roomId: RoomId, matrixBot: MatrixBot, config: Config) {
