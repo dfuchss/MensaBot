@@ -32,10 +32,10 @@
 
         <kotlin.version>1.8.22</kotlin.version>
         <junit.version>5.10.0-M1</junit.version>
-        <ktor.version>2.3.1</ktor.version>
+        <ktor.version>2.3.2</ktor.version>
         <spotless.version>2.28.0</spotless.version>
         <jackson.version>2.15.2</jackson.version>
-        <trixnity.version>3.6.2</trixnity.version>
+        <trixnity.version>3.7.0-beta2</trixnity.version>
         <slf4j.version>2.0.7</slf4j.version>
         <main.class>org.fuchss.matrix.mensa.MainKt</main.class>
     </properties>
@@ -115,7 +115,7 @@
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-coroutines-core</artifactId>
-            <version>1.7.1</version>
+            <version>1.7.2</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
