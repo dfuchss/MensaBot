@@ -1,8 +1,6 @@
 package org.fuchss.matrix.mensa
 
 import io.ktor.http.Url
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import net.folivo.trixnity.client.MatrixClient
 import net.folivo.trixnity.client.getEventId
@@ -32,7 +30,6 @@ private val mensa: MensaAPI = SWKAMensa()
 
 fun main() {
     runBlocking {
-        val scope = CoroutineScope(Dispatchers.Default)
         val config = Config.load()
 
         val matrixClient = MatrixClient.login(
@@ -41,7 +38,6 @@ fun main() {
             password = config.password,
             repositoriesModule = createInMemoryRepositoriesModule(),
             mediaStore = OkioMediaStore(File("media").toOkioPath()),
-            scope = scope,
             initialDeviceDisplayName = "${MatrixBot::class.java.`package`.name}-${Random.Default.nextInt()}"
         ).getOrThrow()
 
