@@ -8,10 +8,10 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
-import org.fuchss.matrix.mensa.api.Meal
 import org.fuchss.matrix.mensa.api.Canteen
 import org.fuchss.matrix.mensa.api.CanteenAPI
 import org.fuchss.matrix.mensa.api.CanteenLine
+import org.fuchss.matrix.mensa.api.Meal
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.slf4j.LoggerFactory
