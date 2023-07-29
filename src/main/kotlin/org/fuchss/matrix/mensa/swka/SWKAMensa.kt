@@ -9,14 +9,14 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import org.fuchss.matrix.mensa.api.Meal
-import org.fuchss.matrix.mensa.api.Mensa
-import org.fuchss.matrix.mensa.api.MensaAPI
-import org.fuchss.matrix.mensa.api.MensaLine
+import org.fuchss.matrix.mensa.api.Canteen
+import org.fuchss.matrix.mensa.api.CanteenAPI
+import org.fuchss.matrix.mensa.api.CanteenLine
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.slf4j.LoggerFactory
 
-class SWKAMensa : MensaAPI {
+class SWKAMensa : CanteenAPI {
     companion object {
         private val logger = LoggerFactory.getLogger(SWKAMensa::class.java)
         private const val SWKA_WEBSITE = //
@@ -24,7 +24,7 @@ class SWKAMensa : MensaAPI {
         private val LINES_TO_CONSIDER = listOf("Linie ", "Schnitzel", "[pizza]werk Pizza", "[pizza]werk Pasta", "[kœri]werk")
     }
 
-    override suspend fun foodAtDate(date: LocalDate): Map<Mensa, List<MensaLine>> {
+    override suspend fun foodAtDate(date: LocalDate): Map<Canteen, List<CanteenLine>> {
         val week = numberOfWeek(date)
         val html = request(week)
 
@@ -39,7 +39,7 @@ class SWKAMensa : MensaAPI {
         }
 
         val mensaLinesRaw = tableOfDay[0].select("td[width=20%] + td")
-        val mensaLines = mutableListOf<MensaLine>()
+        val mensaLines = mutableListOf<CanteenLine>()
 
         for (line in mensaLinesRaw) {
             val name = line.previousElementSibling()?.text()?.trim() ?: continue
@@ -52,13 +52,13 @@ class SWKAMensa : MensaAPI {
                 parseMeal(meal)?.let { meals.add(it) }
             }
             if (meals.isNotEmpty()) {
-                mensaLines.add(MensaLine(name, meals))
+                mensaLines.add(CanteenLine(name, meals))
             }
         }
 
         mensaLines.sortBy { it.name }
 
-        val mensa = Mensa("adenauerring", "Mensa am Adenauerring")
+        val mensa = Canteen("adenauerring", "Mensa am Adenauerring")
         return mapOf(mensa to mensaLines)
     }
 

@@ -15,7 +15,7 @@ import net.folivo.trixnity.core.model.events.Event
 import net.folivo.trixnity.core.model.events.m.room.EncryptedEventContent
 import net.folivo.trixnity.core.model.events.m.room.RoomMessageEventContent
 import okio.Path.Companion.toOkioPath
-import org.fuchss.matrix.mensa.api.MensaAPI
+import org.fuchss.matrix.mensa.api.CanteenAPI
 import org.fuchss.matrix.mensa.swka.SWKAMensa
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -26,7 +26,7 @@ import kotlin.random.Random
 import kotlin.time.Duration.Companion.days
 
 private val logger: Logger = LoggerFactory.getLogger(MatrixBot::class.java)
-private val mensa: MensaAPI = SWKAMensa()
+private val mensa: CanteenAPI = SWKAMensa()
 
 fun main() {
     runBlocking {
