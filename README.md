@@ -40,5 +40,7 @@ Currently, the bot supports the following mensa:
 
 Join our discussion at our matrix channel [#mensa-bot:fuchss.org](https://matrix.to/#/#mensa-bot:fuchss.org)
 
-* The basic functionality (commands) are located in [Main.kt](src/main/kotlin/org/fuchss/matrix/mensa/Main.kt). There you can also find the main method of the program.
-* Every canteen that shall be considered has to implement the `CanteenAPI`. Currently, there is only one implementation for the [sw-ka.de interface](https://sw-ka.de).
+* The bot is build using the [Trixnity](https://trixnity.gitlab.io/trixnity/) framework.
+* The basic functionality is located in [Main.kt](src/main/kotlin/org/fuchss/matrix/mensa/Main.kt). There you can also find the main method of the program.
+* Every canteen that shall be considered has to implement the `CanteenAPI`. Currently, there is only one implementation for
+  the [sw-ka.de interface](https://sw-ka.de).
