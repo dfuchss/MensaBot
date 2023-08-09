@@ -49,7 +49,7 @@ class SWKAMensa : CanteenAPI {
             for (meal in line.select("tr")) {
                 parseMeal(meal)?.let { meals.add(it) }
             }
-            if (meals.isNotEmpty()) {
+            if (meals.isNotEmpty() && !closed(meals)) {
                 mensaLines.add(CanteenLine(name, meals))
             }
         }
@@ -58,6 +58,10 @@ class SWKAMensa : CanteenAPI {
 
         val mensa = Canteen("adenauerring", "Mensa am Adenauerring")
         return mapOf(mensa to mensaLines)
+    }
+
+    private fun closed(meals: List<Meal>): Boolean {
+        return meals.size == 1 && meals[0].name.lowercase() == "geschlossen"
     }
 
     private fun parseMeal(meal: Element): Meal? {
