@@ -23,6 +23,7 @@ import java.util.Date
  * @param[baseUrl] the base url of the matrix server the bot shall use
  * @param[username] the username of the bot's account
  * @param[password] the password of the bot's account
+ * @param[dataDirectory] the path to the databases and media folder
  * @param[timeToSendUpdates] the time the bot shall send updates about the meals every day (to subscribed rooms)
  * @param[admins] the matrix ids of the admins. E.g. "@user:invalid.domain"
  * @param[subscribers] the room ids of rooms that subscribed updates
@@ -32,6 +33,7 @@ data class Config(
     @JsonProperty val baseUrl: String,
     @JsonProperty val username: String,
     @JsonProperty val password: String,
+    @JsonProperty val dataDirectory: String,
     @JsonProperty val timeToSendUpdates: LocalTime,
     @JsonProperty val admins: List<String>,
     @JsonProperty val subscribers: List<String>

@@ -3,12 +3,13 @@ package org.fuchss.matrix.mensa
 import io.ktor.http.Url
 import kotlinx.coroutines.runBlocking
 import net.folivo.trixnity.client.MatrixClient
+import net.folivo.trixnity.client.fromStore
 import net.folivo.trixnity.client.getEventId
 import net.folivo.trixnity.client.getRoomId
 import net.folivo.trixnity.client.login
 import net.folivo.trixnity.client.media.okio.OkioMediaStore
 import net.folivo.trixnity.client.room
-import net.folivo.trixnity.client.store.repository.createInMemoryRepositoriesModule
+import net.folivo.trixnity.client.store.repository.exposed.createExposedRepositoriesModule
 import net.folivo.trixnity.clientserverapi.model.authentication.IdentifierType
 import net.folivo.trixnity.core.model.RoomId
 import net.folivo.trixnity.core.model.events.Event
@@ -17,6 +18,7 @@ import net.folivo.trixnity.core.model.events.m.room.RoomMessageEventContent
 import okio.Path.Companion.toOkioPath
 import org.fuchss.matrix.mensa.api.CanteenAPI
 import org.fuchss.matrix.mensa.swka.SWKAMensa
+import org.jetbrains.exposed.sql.Database
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -32,14 +34,7 @@ fun main() {
     runBlocking {
         val config = Config.load()
 
-        val matrixClient = MatrixClient.login(
-            baseUrl = Url(config.baseUrl),
-            identifier = IdentifierType.User(config.username),
-            password = config.password,
-            repositoriesModule = createInMemoryRepositoriesModule(),
-            mediaStore = OkioMediaStore(File("media").toOkioPath()),
-            initialDeviceDisplayName = "${MatrixBot::class.java.`package`.name}-${Random.Default.nextInt()}"
-        ).getOrThrow()
+        val matrixClient = getMatrixClient(config)
 
         val matrixBot = MatrixBot(matrixClient, config)
 
@@ -47,12 +42,42 @@ fun main() {
         matrixBot.subscribe { event -> handleEncryptedTextMessage(event, matrixClient, matrixBot, config) }
 
         val timer = scheduleMensaMessages(matrixBot, config)
-        matrixBot.startBlocking()
+
+        val loggedOut = matrixBot.startBlocking()
 
         // After Shutdown
         timer.cancel()
+
+        if (loggedOut) {
+            // Cleanup database
+            val databaseFiles = listOf(File(config.dataDirectory + "/database.mv.db"), File(config.dataDirectory + "/database.trace.db"))
+            databaseFiles.filter { it.exists() }.forEach { it.delete() }
+        }
     }
 }
+
+private suspend fun getMatrixClient(config: Config): MatrixClient {
+    val existingMatrixClient = MatrixClient.fromStore(createRepositoriesModule(config), createMediaStore(config)).getOrThrow()
+    if (existingMatrixClient != null) {
+        return existingMatrixClient
+    }
+
+    val matrixClient = MatrixClient.login(
+        baseUrl = Url(config.baseUrl),
+        identifier = IdentifierType.User(config.username),
+        password = config.password,
+        repositoriesModule = createRepositoriesModule(config),
+        mediaStore = createMediaStore(config),
+        initialDeviceDisplayName = "${MatrixBot::class.java.`package`.name}-${Random.Default.nextInt()}"
+    ).getOrThrow()
+
+    return matrixClient
+}
+
+private suspend fun createRepositoriesModule(config: Config) =
+    createExposedRepositoriesModule(database = Database.connect("jdbc:h2:${config.dataDirectory}/database;DB_CLOSE_DELAY=-1"))
+
+private fun createMediaStore(config: Config) = OkioMediaStore(File(config.dataDirectory + "/media").toOkioPath())
 
 private suspend fun handleEncryptedTextMessage(event: Event<EncryptedEventContent>, matrixClient: MatrixClient, matrixBot: MatrixBot, config: Config) {
     val roomId = event.getRoomId() ?: return
@@ -89,6 +114,7 @@ private suspend fun handleTextMessage(roomId: RoomId?, content: RoomMessageEvent
 
     when (message.split(Regex(" "), 2)[0]) {
         "quit" -> matrixBot.quit()
+        "logout" -> matrixBot.quit(logout = true)
         "help" -> help(roomId, matrixBot, config)
         "name" -> changeUsername(roomId, matrixBot, message)
         "show" -> printMensa(roomId, matrixBot, false)
@@ -102,6 +128,7 @@ private suspend fun help(roomId: RoomId, matrixBot: MatrixBot, config: Config) {
         
         * `!${config.prefix} help - shows this help message`
         * `!${config.prefix} quit - quits the bot`
+        * `!${config.prefix} logout - quits the bot and logs out all devices`
         * `!${config.prefix} name [NEW_NAME] - sets the display name of the bot to NEW_NAME (only for the room)`
         * `!${config.prefix} show - shows the mensa food for the day`
         * `!${config.prefix} subscribe - shows instructions to subscribe for the channel`

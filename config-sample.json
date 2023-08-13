@@ -3,6 +3,7 @@
   "baseUrl": "https://matrix-client.matrix.org",
   "username": "",
   "password": "",
+  "dataDirectory": "./data/",
   "timeToSendUpdates": "07:30",
   "admins": [
     "@dominik:fuchss.org"

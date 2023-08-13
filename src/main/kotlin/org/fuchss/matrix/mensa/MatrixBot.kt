@@ -11,12 +11,15 @@ import net.folivo.trixnity.client.getRoomId
 import net.folivo.trixnity.client.getSender
 import net.folivo.trixnity.client.room
 import net.folivo.trixnity.client.room.RoomService
+import net.folivo.trixnity.clientserverapi.client.RoomsApiClient
 import net.folivo.trixnity.clientserverapi.client.SyncApiClient
 import net.folivo.trixnity.clientserverapi.client.SyncState
 import net.folivo.trixnity.core.EventSubscriber
+import net.folivo.trixnity.core.model.EventId
 import net.folivo.trixnity.core.model.RoomId
 import net.folivo.trixnity.core.model.events.Event
 import net.folivo.trixnity.core.model.events.EventContent
+import net.folivo.trixnity.core.model.events.StateEventContent
 import net.folivo.trixnity.core.model.events.m.room.MemberEventContent
 import net.folivo.trixnity.core.model.events.m.room.Membership
 import net.folivo.trixnity.core.subscribe
@@ -35,14 +38,17 @@ class MatrixBot(private val matrixClient: MatrixClient, private val config: Conf
     private val runningLock = Semaphore(1, 1)
     private var running: Boolean = false
 
+    private var logout: Boolean = false
+
     init {
         matrixClient.api.sync.subscribe { event -> handleJoinEvent(event) }
     }
 
     /**
      * Starts the bot. Note that this method blocks until [quit] will be executed from another thread.
+     * @return true if the bot was logged out, false if the bot simply quit.
      */
-    suspend fun startBlocking() {
+    suspend fun startBlocking(): Boolean {
         running = true
         registerShutdownHook()
 
@@ -58,7 +64,13 @@ class MatrixBot(private val matrixClient: MatrixClient, private val config: Conf
             delay(500)
         }
         running = false
-        matrixClient.api.authentication.logoutAll()
+        if (logout) {
+            matrixClient.api.authentication.logoutAll()
+        }
+
+        matrixClient.stop()
+
+        return logout
     }
 
     /**
@@ -67,23 +79,62 @@ class MatrixBot(private val matrixClient: MatrixClient, private val config: Conf
     fun room() = matrixClient.room
 
     /**
-     * Subscribe to a certain class of event. Note that you can only subscribe for events that are sent by an [admin][Config.admins] by default.
+     * Get teh content mappings for [getStateEvent]
+     */
+    fun contentMappings() = matrixClient.api.rooms.contentMappings
+
+    /**
+     * Get the state event of a certain type
+     * @param[type] the type
+     * @param[roomId] the roomId
+     * @return the state event content
+     */
+    suspend fun getStateEvent(type: String, roomId: RoomId): Result<StateEventContent> = matrixClient.api.rooms.getStateEvent(type, roomId)
+
+    /**
+     * Send a certain state event
+     * @param[roomId] the id of the room
+     * @param[eventContent] the content of the state event
+     */
+    suspend fun sendStateEvent(
+        roomId: RoomId,
+        eventContent: StateEventContent
+    ): Result<EventId> = matrixClient.api.rooms.sendStateEvent(roomId, eventContent)
+
+    /**
+     * Access to the [RoomsApiClient] to create rooms and manage users.
+     */
+    fun rooms() = matrixClient.api.rooms
+
+    /**
+     * Get the bot's user id
+     * @return the user id of the bot
+     */
+    fun self() = matrixClient.userId
+
+    /**
+     * Subscribe to a certain class of event. Note that you can only subscribe for events that are sent by a [users][Config.users] by default.
      *
      * @param[clazz] the clas of event to subscribe
      * @param[subscriber] the function to invoke for the events
-     * @param[listenNonAdmins] whether you want to subscribe for events from non admins
+     * @param[listenNonUsers] whether you want to subscribe for events from non-users
      * @see [SyncApiClient.subscribe]
      */
-    fun <T : EventContent> subscribe(clazz: KClass<T>, subscriber: EventSubscriber<T>, listenNonAdmins: Boolean = false) {
-        matrixClient.api.sync.subscribe(clazz) { event -> if (isValidEventFromAdmin(event, listenNonAdmins)) subscriber(event) }
+    fun <T : EventContent> subscribe(clazz: KClass<T>, subscriber: EventSubscriber<T>, listenNonUsers: Boolean = false) {
+        matrixClient.api.sync.subscribe(clazz) { event -> if (isValidEventFromAdmin(event, listenNonUsers)) subscriber(event) }
     }
 
     /**
      * Quit the bot. This will end the lock of [startBlocking]. Additionally, it will log out all instances of the bot user.
      */
-    suspend fun quit() {
-        runningLock.release()
+    suspend fun quit(logout: Boolean = false) {
+        this.logout = logout
         matrixClient.stopSync()
+        runningLock.release()
+    }
+
+    suspend fun rename(newName: String) {
+        matrixClient.api.users.setDisplayName(matrixClient.userId, newName)
     }
 
     /**
@@ -108,7 +159,7 @@ class MatrixBot(private val matrixClient: MatrixClient, private val config: Conf
     private suspend fun handleJoinEvent(event: Event<MemberEventContent>) {
         val roomId = event.getRoomId() ?: return
 
-        if (!config.isAdmin(event.getSender())) return
+        if (!config.isAdmin(event.getSender()) || event.getSender() == self()) return
 
         if (event.content.membership != Membership.JOIN) {
             logger.debug("Got Membership Event: {}", event)
