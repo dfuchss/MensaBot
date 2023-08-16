@@ -1,4 +1,4 @@
-FROM maven:3-eclipse-temurin-17 as builder
+FROM maven:3-eclipse-temurin-20 as builder
 
 WORKDIR /usr/src/bot
 COPY src src
