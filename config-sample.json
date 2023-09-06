@@ -8,5 +8,9 @@
   "admins": [
     "@dominik:fuchss.org"
   ],
+    "users": [
+        ":matrix.org",
+        ":fuchss.org"
+    ],
   "subscribers": []
 }

@@ -8,7 +8,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.toJavaLocalTime
 import net.folivo.trixnity.core.model.RoomId
-import net.folivo.trixnity.core.model.UserId
+import org.fuchss.matrix.bots.IConfig
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -29,15 +29,16 @@ import java.util.Date
  * @param[subscribers] the room ids of rooms that subscribed updates
  */
 data class Config(
-    @JsonProperty val prefix: String = "mensa",
-    @JsonProperty val baseUrl: String,
-    @JsonProperty val username: String,
-    @JsonProperty val password: String,
-    @JsonProperty val dataDirectory: String,
+    @JsonProperty override val prefix: String = "mensa",
+    @JsonProperty override val baseUrl: String,
+    @JsonProperty override val username: String,
+    @JsonProperty override val password: String,
+    @JsonProperty override val dataDirectory: String,
+    @JsonProperty override val admins: List<String>,
+    @JsonProperty override val users: List<String> = listOf(),
     @JsonProperty val timeToSendUpdates: LocalTime,
-    @JsonProperty val admins: List<String>,
     @JsonProperty val subscribers: List<String>
-) {
+) : IConfig {
     companion object {
         private val log: Logger = LoggerFactory.getLogger(Config::class.java)
 
@@ -53,23 +54,9 @@ data class Config(
 
             val config: Config = ObjectMapper().registerKotlinModule().registerModule(JavaTimeModule()).readValue(configFile)
             log.info("Loaded config ${configFile.absolutePath}")
+            config.validate()
             return config
         }
-    }
-
-    /**
-     * Determine whether a user id belongs to an admin.
-     * @param[user] the user id to check
-     * @return indicator for admin privileges
-     */
-    fun isAdmin(user: UserId?): Boolean {
-        if (user == null) {
-            return false
-        }
-        if (admins.isEmpty()) {
-            return true
-        }
-        return user.full in admins
     }
 
     /**

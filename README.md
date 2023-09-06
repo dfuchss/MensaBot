@@ -25,6 +25,7 @@ Currently, the bot supports the following mensa:
     * Copy `config-sample.json` to `config.json`
     * Enter `baseUrl` to the matrix server and `username` / `password` for the bot user
     * Add yourself to the `admins` (and delete my account from the list :))
+    * You can limit the users that can interact with the bot by defining the `users` list
 3. Either run the bot via jar or run it via the provided docker.
     * If you run it locally, you can use the environment variable `CONFIG_PATH` to point at your `config.json` (defaults to `./config.json`)
     * If you run it in docker, you can use a command similar to this `docker run -itd -v $LOCAL_PATH_TO_CONFIG:/usr/src/bot/data/config.json:ro ghcr.io/dfuchss/mensabot`
