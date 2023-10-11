@@ -40,12 +40,13 @@ fun main() {
     runBlocking {
         val config = Config.load()
 
-        commands = listOf(
-            HelpCommand(config) {
-                commands
-            },
-            QuitCommand(config), LogoutCommand(config), ChangeUsernameCommand(), ShowCommand(canteenAPI), SubscribeCommand(config)
-        )
+        commands =
+            listOf(
+                HelpCommand(config) {
+                    commands
+                },
+                QuitCommand(config), LogoutCommand(config), ChangeUsernameCommand(), ShowCommand(canteenAPI), SubscribeCommand(config)
+            )
 
         val matrixClient = getMatrixClient(config)
 
@@ -75,18 +76,23 @@ private suspend fun getMatrixClient(config: Config): MatrixClient {
         return existingMatrixClient
     }
 
-    val matrixClient = MatrixClient.login(
-        baseUrl = Url(config.baseUrl),
-        identifier = IdentifierType.User(config.username),
-        password = config.password,
-        repositoriesModule = createRepositoriesModule(config),
-        mediaStore = createMediaStore(config),
-        initialDeviceDisplayName = "${MatrixBot::class.java.`package`.name}-${Random.Default.nextInt()}"
-    ).getOrThrow()
+    val matrixClient =
+        MatrixClient.login(
+            baseUrl = Url(config.baseUrl),
+            identifier = IdentifierType.User(config.username),
+            password = config.password,
+            repositoriesModule = createRepositoriesModule(config),
+            mediaStore = createMediaStore(config),
+            initialDeviceDisplayName = "${MatrixBot::class.java.`package`.name}-${Random.Default.nextInt()}"
+        ).getOrThrow()
 
     return matrixClient
 }
-private fun scheduleMensaMessages(matrixBot: MatrixBot, config: Config): Timer {
+
+private fun scheduleMensaMessages(
+    matrixBot: MatrixBot,
+    config: Config
+): Timer {
     val timer = Timer(true)
     timer.schedule(
         object : TimerTask() {

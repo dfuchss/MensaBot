@@ -23,7 +23,6 @@ data class Meal(
     val priceGuest: Double,
     val priceEmployee: Double,
     val pricePupil: Double,
-
     val fish: Boolean,
     val pork: Boolean,
     val cow: Boolean,

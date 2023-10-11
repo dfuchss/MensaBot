@@ -11,7 +11,12 @@ class ShowCommand(private val canteen: CanteenAPI) : Command() {
     override val name: String = "show"
     override val help: String = "show the mensa plan for today"
 
-    override suspend fun execute(matrixBot: MatrixBot, sender: UserId, roomId: RoomId, parameters: String) {
+    override suspend fun execute(
+        matrixBot: MatrixBot,
+        sender: UserId,
+        roomId: RoomId,
+        parameters: String
+    ) {
         sendCanteenEventToRoom(roomId, matrixBot, false, canteen)
     }
 }

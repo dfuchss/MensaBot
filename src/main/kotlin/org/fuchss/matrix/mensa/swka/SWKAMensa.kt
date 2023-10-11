@@ -106,9 +106,10 @@ class SWKAMensa : CanteenAPI {
 
     private suspend fun request(weekOfYear: Int): String {
         val client = HttpClient()
-        val response = client.request(SWKA_WEBSITE.replace("%%%WoY%%%", weekOfYear.toString())) {
-            method = HttpMethod.Get
-        }
+        val response =
+            client.request(SWKA_WEBSITE.replace("%%%WoY%%%", weekOfYear.toString())) {
+                method = HttpMethod.Get
+            }
         return response.body()
     }
 }

@@ -9,7 +9,12 @@ import org.slf4j.LoggerFactory
 
 private val logger: Logger = LoggerFactory.getLogger(MatrixBot::class.java)
 
-suspend fun sendCanteenEventToRoom(roomId: RoomId, matrixBot: MatrixBot, scheduled: Boolean, canteen: CanteenAPI) {
+suspend fun sendCanteenEventToRoom(
+    roomId: RoomId,
+    matrixBot: MatrixBot,
+    scheduled: Boolean,
+    canteen: CanteenAPI
+) {
     logger.info("Sending Mensa to Room ${roomId.full}")
 
     val mensaToday = canteen.foodToday()
