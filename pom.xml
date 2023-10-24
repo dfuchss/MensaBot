@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.fuchss</groupId>
         <artifactId>maven-parent</artifactId>
-        <version>0.10.0</version>
+        <version>0.11.0</version>
     </parent>
 
     <groupId>org.fuchss.matrix</groupId>
@@ -45,7 +45,7 @@
         <dependency>
             <groupId>org.fuchss</groupId>
             <artifactId>matrix-bot-base</artifactId>
-            <version>0.3.0</version>
+            <version>0.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -55,7 +55,7 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.16.1</version>
+            <version>1.16.2</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
