@@ -8,6 +8,7 @@ import net.folivo.trixnity.client.login
 import net.folivo.trixnity.clientserverapi.model.authentication.IdentifierType
 import net.folivo.trixnity.core.model.events.roomIdOrNull
 import net.folivo.trixnity.core.model.events.senderOrNull
+import net.folivo.trixnity.core.subscribeContent
 import org.fuchss.matrix.bots.MatrixBot
 import org.fuchss.matrix.bots.command.ChangeUsernameCommand
 import org.fuchss.matrix.bots.command.Command
@@ -42,7 +43,7 @@ fun main() {
 
         commands =
             listOf(
-                HelpCommand(config) {
+                HelpCommand(config, "MensaBot") {
                     commands
                 },
                 QuitCommand(config), LogoutCommand(config), ChangeUsernameCommand(), ShowCommand(canteenAPI), SubscribeCommand(config)
@@ -52,8 +53,8 @@ fun main() {
 
         val matrixBot = MatrixBot(matrixClient, config)
 
-        matrixBot.subscribe { event -> handleTextMessage(commands, event.roomIdOrNull, event.senderOrNull, event.content, matrixBot, config) }
-        matrixBot.subscribe { event -> handleEncryptedTextMessage(commands, event, matrixClient, matrixBot, config) }
+        matrixBot.subscribeContent { event -> handleTextMessage(commands, event.roomIdOrNull, event.senderOrNull, event.content, matrixBot, config) }
+        matrixBot.subscribeContent { event -> handleEncryptedTextMessage(commands, event, matrixClient, matrixBot, config) }
 
         val timer = scheduleMensaMessages(matrixBot, config)
 
