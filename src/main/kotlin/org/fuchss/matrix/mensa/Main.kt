@@ -46,7 +46,11 @@ fun main() {
                 HelpCommand(config, "MensaBot") {
                     commands
                 },
-                QuitCommand(config), LogoutCommand(config), ChangeUsernameCommand(), ShowCommand(canteenAPI), SubscribeCommand(config)
+                QuitCommand(config),
+                LogoutCommand(config),
+                ChangeUsernameCommand(),
+                ShowCommand(canteenAPI),
+                SubscribeCommand(config)
             )
 
         val matrixClient = getMatrixClient(config)
