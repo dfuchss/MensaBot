@@ -74,17 +74,13 @@ class SWKAMensa : CanteenAPI {
         // <span class="bg"> <b>Gebratene Hähnchenkeule Peperonata</b> <span>in Paprikasoße Curryreis</span> (1,Se,We)</span>
         val mealName = nameXPrice[0].text().split("(")[0].trim()
         // <span class="bg">3,20 €</span>
-        val priceStudent = nameXPrice[1].text().split(" ")[0].replace(',', '.').trim().toDoubleOrNull() ?: Double.NaN
+        // val priceStudent = nameXPrice[1].text().split(" ")[0].replace(',', '.').trim().toDoubleOrNull() ?: Double.NaN
         // <td style="background: white;width:115px;" valign="top">[VG]</td>
         val additionalInformation = parseAdditionalInformation(meal.select("td")[0].text().trim())
 
         return Meal(
             name = mealName,
             foodAdditiveNumbers = emptyList(),
-            priceStudent = priceStudent,
-            priceGuest = Double.NaN,
-            priceEmployee = Double.NaN,
-            pricePupil = Double.NaN,
             fish = additionalInformation.contains("MSC"),
             pork = additionalInformation.contains("S") || additionalInformation.contains("SAT"),
             cow = additionalInformation.contains("R") || additionalInformation.contains("RAT"),

@@ -6,10 +6,6 @@ import com.vdurmont.emoji.EmojiManager
  * This data class defines all information that should be provided by a meal.
  * @param[name] the name of the meal
  * @param[foodAdditiveNumbers] some specific additive numbers of the meal (e.g., "Nuts (PA)")
- * @param[priceStudent] the price for a student
- * @param[priceGuest] the price for a guest
- * @param[priceEmployee] the price for an employee
- * @param[pricePupil] the price for a pupil
  * @param[fish] indicator for fish
  * @param[pork] indicator for pork
  * @param[cow] indicator for cow
@@ -19,10 +15,6 @@ import com.vdurmont.emoji.EmojiManager
 data class Meal(
     val name: String,
     val foodAdditiveNumbers: List<String>,
-    val priceStudent: Double,
-    val priceGuest: Double,
-    val priceEmployee: Double,
-    val pricePupil: Double,
     val fish: Boolean,
     val pork: Boolean,
     val cow: Boolean,
