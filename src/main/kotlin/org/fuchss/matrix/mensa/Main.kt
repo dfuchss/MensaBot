@@ -6,9 +6,6 @@ import net.folivo.trixnity.client.MatrixClient
 import net.folivo.trixnity.client.fromStore
 import net.folivo.trixnity.client.login
 import net.folivo.trixnity.clientserverapi.model.authentication.IdentifierType
-import net.folivo.trixnity.core.model.events.roomIdOrNull
-import net.folivo.trixnity.core.model.events.senderOrNull
-import net.folivo.trixnity.core.subscribeContent
 import org.fuchss.matrix.bots.MatrixBot
 import org.fuchss.matrix.bots.command.ChangeUsernameCommand
 import org.fuchss.matrix.bots.command.Command
@@ -17,8 +14,8 @@ import org.fuchss.matrix.bots.command.LogoutCommand
 import org.fuchss.matrix.bots.command.QuitCommand
 import org.fuchss.matrix.bots.helper.createMediaStore
 import org.fuchss.matrix.bots.helper.createRepositoriesModule
-import org.fuchss.matrix.bots.helper.handleEncryptedTextMessage
-import org.fuchss.matrix.bots.helper.handleTextMessage
+import org.fuchss.matrix.bots.helper.handleCommand
+import org.fuchss.matrix.bots.helper.handleEncryptedCommand
 import org.fuchss.matrix.mensa.api.CanteenAPI
 import org.fuchss.matrix.mensa.handler.command.ShowCommand
 import org.fuchss.matrix.mensa.handler.command.SubscribeCommand
@@ -57,8 +54,8 @@ fun main() {
 
         val matrixBot = MatrixBot(matrixClient, config)
 
-        matrixBot.subscribeContent { event -> handleTextMessage(commands, event.roomIdOrNull, event.senderOrNull, event.content, matrixBot, config) }
-        matrixBot.subscribeContent { event -> handleEncryptedTextMessage(commands, event, matrixClient, matrixBot, config) }
+        matrixBot.subscribeContent { event -> handleCommand(commands, event, matrixBot, config) }
+        matrixBot.subscribeContent { event -> handleEncryptedCommand(commands, event, matrixBot, config) }
 
         val timer = scheduleMensaMessages(matrixBot, config)
 

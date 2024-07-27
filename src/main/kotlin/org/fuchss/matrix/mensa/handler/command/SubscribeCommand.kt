@@ -1,7 +1,9 @@
 package org.fuchss.matrix.mensa.handler.command
 
+import net.folivo.trixnity.core.model.EventId
 import net.folivo.trixnity.core.model.RoomId
 import net.folivo.trixnity.core.model.UserId
+import net.folivo.trixnity.core.model.events.m.room.RoomMessageEventContent
 import org.fuchss.matrix.bots.MatrixBot
 import org.fuchss.matrix.bots.command.Command
 import org.fuchss.matrix.bots.markdown
@@ -15,7 +17,9 @@ class SubscribeCommand(private val config: Config) : Command() {
         matrixBot: MatrixBot,
         sender: UserId,
         roomId: RoomId,
-        parameters: String
+        parameters: String,
+        textEventId: EventId,
+        textEvent: RoomMessageEventContent.TextBased.Text
     ) {
         var message = "Please send `${roomId.full}` to a bot admin to subscribe. Your admins are:"
         message += if (config.admins.isEmpty()) " ???" else "\n"
