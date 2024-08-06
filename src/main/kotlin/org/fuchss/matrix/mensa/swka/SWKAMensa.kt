@@ -61,7 +61,7 @@ class SWKAMensa : CanteenAPI {
     }
 
     private fun closed(meals: List<Meal>): Boolean {
-        return meals.size == 1 && meals[0].name.lowercase() == "geschlossen"
+        return meals.size == 1 && meals[0].name.lowercase().contains("geschlossen")
     }
 
     private fun parseMeal(meal: Element): Meal? {
