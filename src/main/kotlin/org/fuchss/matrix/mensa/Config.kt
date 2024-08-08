@@ -1,6 +1,5 @@
 package org.fuchss.matrix.mensa
 
-import TranslationConfig
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule

@@ -1,3 +1,5 @@
+package org.fuchss.matrix.mensa
+
 import dev.langchain4j.model.chat.ChatLanguageModel
 import dev.langchain4j.model.ollama.OllamaChatModel
 import okhttp3.Credentials

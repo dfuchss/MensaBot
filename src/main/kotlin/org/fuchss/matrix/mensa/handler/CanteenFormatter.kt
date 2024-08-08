@@ -1,9 +1,9 @@
 package org.fuchss.matrix.mensa.handler
 
-import TranslationService
 import net.folivo.trixnity.core.model.RoomId
 import org.fuchss.matrix.bots.MatrixBot
 import org.fuchss.matrix.bots.markdown
+import org.fuchss.matrix.mensa.TranslationService
 import org.fuchss.matrix.mensa.api.CanteenAPI
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

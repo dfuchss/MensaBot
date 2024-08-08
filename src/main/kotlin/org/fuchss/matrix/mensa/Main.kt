@@ -1,6 +1,5 @@
 package org.fuchss.matrix.mensa
 
-import TranslationService
 import io.ktor.http.Url
 import kotlinx.coroutines.runBlocking
 import net.folivo.trixnity.client.MatrixClient

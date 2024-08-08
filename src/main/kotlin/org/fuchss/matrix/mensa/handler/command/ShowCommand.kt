@@ -1,12 +1,12 @@
 package org.fuchss.matrix.mensa.handler.command
 
-import TranslationService
 import net.folivo.trixnity.core.model.EventId
 import net.folivo.trixnity.core.model.RoomId
 import net.folivo.trixnity.core.model.UserId
 import net.folivo.trixnity.core.model.events.m.room.RoomMessageEventContent
 import org.fuchss.matrix.bots.MatrixBot
 import org.fuchss.matrix.bots.command.Command
+import org.fuchss.matrix.mensa.TranslationService
 import org.fuchss.matrix.mensa.api.CanteenAPI
 import org.fuchss.matrix.mensa.handler.sendCanteenEventToRoom
 
