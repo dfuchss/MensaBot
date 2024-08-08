@@ -10,7 +10,7 @@
 
     <groupId>org.fuchss.matrix</groupId>
     <artifactId>mensabot</artifactId>
-    <version>0.27.20-SNAPSHOT</version>
+    <version>0.28.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>MensaBot</name>
 
@@ -34,6 +34,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <main.class>org.fuchss.matrix.mensa.MainKt</main.class>
+        <langchain4j.version>0.33.0</langchain4j.version>
     </properties>
 
     <dependencies>
@@ -41,6 +42,16 @@
             <groupId>com.vdurmont</groupId>
             <artifactId>emoji-java</artifactId>
             <version>5.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j</artifactId>
+            <version>${langchain4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-ollama</artifactId>
+            <version>${langchain4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.fuchss</groupId>

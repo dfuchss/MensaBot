@@ -12,5 +12,6 @@
         ":matrix.org",
         ":fuchss.org"
     ],
-  "subscribers": []
+    "subscribers": [],
+    "translation": null
 }

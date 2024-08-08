@@ -1,5 +1,6 @@
 package org.fuchss.matrix.mensa
 
+import TranslationService
 import io.ktor.http.Url
 import kotlinx.coroutines.runBlocking
 import net.folivo.trixnity.client.MatrixClient
@@ -30,13 +31,14 @@ import kotlin.random.Random
 import kotlin.time.Duration.Companion.days
 
 private val logger: Logger = LoggerFactory.getLogger(MatrixBot::class.java)
-private val canteenAPI: CanteenAPI = SWKAMensa()
 
 private lateinit var commands: List<Command>
 
 fun main() {
     runBlocking {
         val config = Config.load()
+        val canteenApi: CanteenAPI = SWKAMensa()
+        val translationService = TranslationService(config.translation)
 
         commands =
             listOf(
@@ -46,7 +48,7 @@ fun main() {
                 QuitCommand(config),
                 LogoutCommand(config),
                 ChangeUsernameCommand(),
-                ShowCommand(canteenAPI),
+                ShowCommand(canteenApi, translationService),
                 SubscribeCommand(config)
             )
 
@@ -57,7 +59,7 @@ fun main() {
         matrixBot.subscribeContent { event -> handleCommand(commands, event, matrixBot, config) }
         matrixBot.subscribeContent { event -> handleEncryptedCommand(commands, event, matrixBot, config) }
 
-        val timer = scheduleMensaMessages(matrixBot, config)
+        val timer = scheduleMensaMessages(matrixBot, config, canteenApi, translationService)
 
         val loggedOut = matrixBot.startBlocking()
 
@@ -93,7 +95,9 @@ private suspend fun getMatrixClient(config: Config): MatrixClient {
 
 private fun scheduleMensaMessages(
     matrixBot: MatrixBot,
-    config: Config
+    config: Config,
+    canteenApi: CanteenAPI,
+    translationService: TranslationService
 ): Timer {
     val timer = Timer(true)
     timer.schedule(
@@ -104,7 +108,7 @@ private fun scheduleMensaMessages(
 
                     for (roomId in config.subscriptions()) {
                         try {
-                            sendCanteenEventToRoom(roomId, matrixBot, true, canteenAPI)
+                            sendCanteenEventToRoom(roomId, matrixBot, true, canteenApi, translationService)
                         } catch (e: Exception) {
                             logger.error(e.message, e)
                         }

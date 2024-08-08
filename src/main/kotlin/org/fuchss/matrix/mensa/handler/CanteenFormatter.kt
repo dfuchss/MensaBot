@@ -1,5 +1,6 @@
 package org.fuchss.matrix.mensa.handler
 
+import TranslationService
 import net.folivo.trixnity.core.model.RoomId
 import org.fuchss.matrix.bots.MatrixBot
 import org.fuchss.matrix.bots.markdown
@@ -13,7 +14,8 @@ suspend fun sendCanteenEventToRoom(
     roomId: RoomId,
     matrixBot: MatrixBot,
     scheduled: Boolean,
-    canteen: CanteenAPI
+    canteen: CanteenAPI,
+    translationService: TranslationService
 ) {
     logger.info("Sending Mensa to Room ${roomId.full}")
 
@@ -37,6 +39,8 @@ suspend fun sendCanteenEventToRoom(
     if (response.isBlank()) {
         response = "Kein Essen heute :("
     }
+
+    response = translationService.translate(response)
 
     matrixBot.room().sendMessage(roomId) { markdown(response.trim()) }
 }

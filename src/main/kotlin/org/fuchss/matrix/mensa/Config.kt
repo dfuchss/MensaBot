@@ -1,5 +1,6 @@
 package org.fuchss.matrix.mensa
 
+import TranslationConfig
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -27,6 +28,7 @@ import java.util.Date
  * @param[timeToSendUpdates] the time the bot shall send updates about the meals every day (to subscribed rooms)
  * @param[admins] the matrix ids of the admins. E.g. "@user:invalid.domain"
  * @param[subscribers] the room ids of rooms that subscribed updates
+ * @param[translation] the configuration for translations (optional, alpha)
  */
 data class Config(
     @JsonProperty override val prefix: String = "mensa",
@@ -37,7 +39,8 @@ data class Config(
     @JsonProperty override val admins: List<String>,
     @JsonProperty override val users: List<String> = listOf(),
     @JsonProperty val timeToSendUpdates: LocalTime,
-    @JsonProperty val subscribers: List<String>
+    @JsonProperty val subscribers: List<String>,
+    @JsonProperty val translation: TranslationConfig? = null
 ) : IConfig {
     companion object {
         private val log: Logger = LoggerFactory.getLogger(Config::class.java)
