@@ -10,9 +10,6 @@ class TranslationService(private val config: TranslationConfig?) {
 
     private val chatModel = config?.let { createChatModel(it) }
 
-    private val translationCache = mutableMapOf<String, String>()
-    private val translationCacheSize = 5
-
     @Synchronized
     fun translate(text: String): String {
         if (config == null) {
@@ -25,24 +22,12 @@ class TranslationService(private val config: TranslationConfig?) {
             return text
         }
 
-        var translated = translationCache[text]
-        if (translated != null) {
-            return translated
-        }
-
         try {
-            translated = chatModel.generate(config.prompt.replaceFirst("{}", config.model).replaceFirst("{}", text))
+            return chatModel.generate(config.prompt.replaceFirst("{}", config.model).replaceFirst("{}", text))
         } catch (e: Exception) {
             logger.error("Error while translating text: $text", e)
             return text
         }
-
-        if (translationCache.size >= translationCacheSize) {
-            translationCache.remove(translationCache.keys.first())
-        }
-        translationCache[text] = translated
-
-        return translated
     }
 
     private fun createChatModel(config: TranslationConfig): ChatLanguageModel {
@@ -59,5 +44,5 @@ data class TranslationConfig(
     val ollamaUser: String? = null,
     val ollamaPassword: String? = null,
     val model: String = "llama3.1:8b",
-    val prompt: String = "Translate to English. No further output. Keep markdown. Add hint about the translation using {} at the end.\n{}"
+    val prompt: String = "Translate to English. No further output. Keep markdown. Add hint about the translation by {} at the end.\n{}"
 )
