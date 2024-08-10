@@ -16,7 +16,7 @@ import org.fuchss.matrix.bots.helper.createMediaStore
 import org.fuchss.matrix.bots.helper.createRepositoriesModule
 import org.fuchss.matrix.bots.helper.handleCommand
 import org.fuchss.matrix.bots.helper.handleEncryptedCommand
-import org.fuchss.matrix.mensa.api.CanteenAPI
+import org.fuchss.matrix.mensa.api.CanteensApi
 import org.fuchss.matrix.mensa.handler.command.ShowCommand
 import org.fuchss.matrix.mensa.handler.command.SubscribeCommand
 import org.fuchss.matrix.mensa.handler.sendCanteenEventToRoom
@@ -36,7 +36,7 @@ private lateinit var commands: List<Command>
 fun main() {
     runBlocking {
         val config = Config.load()
-        val canteenApi: CanteenAPI = SWKAMensa()
+        val canteenApi: CanteensApi = SWKAMensa()
         val translationService = TranslationService(config.translation)
 
         commands =
@@ -95,7 +95,7 @@ private suspend fun getMatrixClient(config: Config): MatrixClient {
 private fun scheduleMensaMessages(
     matrixBot: MatrixBot,
     config: Config,
-    canteenApi: CanteenAPI,
+    canteenApi: CanteensApi,
     translationService: TranslationService
 ): Timer {
     val timer = Timer(true)

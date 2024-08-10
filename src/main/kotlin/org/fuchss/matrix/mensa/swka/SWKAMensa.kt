@@ -6,18 +6,19 @@ import io.ktor.client.request.request
 import io.ktor.http.HttpMethod
 import kotlinx.datetime.LocalDate
 import org.fuchss.matrix.mensa.api.Canteen
-import org.fuchss.matrix.mensa.api.CanteenAPI
 import org.fuchss.matrix.mensa.api.CanteenLine
+import org.fuchss.matrix.mensa.api.CanteensApi
 import org.fuchss.matrix.mensa.api.Meal
 import org.fuchss.matrix.mensa.numberOfWeek
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.slf4j.LoggerFactory
 
-class SWKAMensa : CanteenAPI {
+class SWKAMensa : CanteensApi {
     companion object {
         private val logger = LoggerFactory.getLogger(SWKAMensa::class.java)
-        private const val SWKA_WEBSITE = //
+        private const val SWKA_WEBSITE = "https://www.sw-ka.de/en/hochschulgastronomie/speiseplan/mensa_adenauerring/"
+        private const val SWKA_WEBSITE_API = //
             "https://www.sw-ka.de/de/hochschulgastronomie/speiseplan/mensa_adenauerring/?view=ok&c=adenauerring&STYLE=popup_plain&kw=%%%WoY%%%"
         private val LINES_TO_CONSIDER = listOf("Linie ", "Schnitzel", "[pizza]werk Pizza", "[pizza]werk Pasta", "[kœri]werk")
     }
@@ -56,7 +57,7 @@ class SWKAMensa : CanteenAPI {
 
         mensaLines.sortBy { it.name }
 
-        val mensa = Canteen("adenauerring", "Mensa am Adenauerring")
+        val mensa = Canteen("adenauerring", "Mensa am Adenauerring", link = SWKA_WEBSITE)
         return mapOf(mensa to mensaLines)
     }
 
@@ -85,7 +86,8 @@ class SWKAMensa : CanteenAPI {
             pork = additionalInformation.contains("S") || additionalInformation.contains("SAT"),
             cow = additionalInformation.contains("R") || additionalInformation.contains("RAT"),
             vegan = additionalInformation.contains("VG"),
-            vegetarian = additionalInformation.contains("VEG")
+            vegetarian = additionalInformation.contains("VEG"),
+            chicken = additionalInformation.contains("G") || additionalInformation.contains("GAT")
         )
     }
 
@@ -103,7 +105,7 @@ class SWKAMensa : CanteenAPI {
     private suspend fun request(weekOfYear: Int): String {
         val client = HttpClient()
         val response =
-            client.request(SWKA_WEBSITE.replace("%%%WoY%%%", weekOfYear.toString())) {
+            client.request(SWKA_WEBSITE_API.replace("%%%WoY%%%", weekOfYear.toString())) {
                 method = HttpMethod.Get
             }
         return response.body()

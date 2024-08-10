@@ -7,10 +7,10 @@ import net.folivo.trixnity.core.model.events.m.room.RoomMessageEventContent
 import org.fuchss.matrix.bots.MatrixBot
 import org.fuchss.matrix.bots.command.Command
 import org.fuchss.matrix.mensa.TranslationService
-import org.fuchss.matrix.mensa.api.CanteenAPI
+import org.fuchss.matrix.mensa.api.CanteensApi
 import org.fuchss.matrix.mensa.handler.sendCanteenEventToRoom
 
-class ShowCommand(private val canteen: CanteenAPI, private val translationService: TranslationService) : Command() {
+class ShowCommand(private val canteen: CanteensApi, private val translationService: TranslationService) : Command() {
     override val name: String = "show"
     override val help: String = "show the mensa plan for today"
 

@@ -1,10 +1,15 @@
 package org.fuchss.matrix.mensa.handler
 
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
+import kotlinx.datetime.todayIn
 import net.folivo.trixnity.core.model.RoomId
 import org.fuchss.matrix.bots.MatrixBot
 import org.fuchss.matrix.bots.markdown
 import org.fuchss.matrix.mensa.TranslationService
-import org.fuchss.matrix.mensa.api.CanteenAPI
+import org.fuchss.matrix.mensa.api.CanteensApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -14,7 +19,7 @@ suspend fun sendCanteenEventToRoom(
     roomId: RoomId,
     matrixBot: MatrixBot,
     scheduled: Boolean,
-    canteen: CanteenAPI,
+    canteen: CanteensApi,
     translationService: TranslationService
 ) {
     logger.info("Sending Mensa to Room ${roomId.full}")
@@ -29,7 +34,7 @@ suspend fun sendCanteenEventToRoom(
 
     var response = ""
     for ((mensa, lines) in mensaToday) {
-        if (mensaToday.size != 1) response += "## ${mensa.name}\n"
+        response += if (mensa.link == null) "## ${mensa.name}\n" else "## [${mensa.name}](<${mensa.link}>)\n"
         for (l in lines) {
             response += "### ${l.name}\n"
             for (meal in l.meals) response += "* ${meal.entry()}\n"
@@ -40,7 +45,11 @@ suspend fun sendCanteenEventToRoom(
         response = "Kein Essen heute :("
     }
 
-    response = translationService.translate(response)
+    response = translationService.translate(response).trim()
+    // Crop translation indications ..
+    if (response.contains("#") && !response.startsWith("#")) {
+        response = response.substring(response.indexOf("#"))
+    }
 
-    matrixBot.room().sendMessage(roomId) { markdown(response.trim()) }
+    matrixBot.room().sendMessage(roomId) { markdown(response) }
 }

@@ -11,6 +11,7 @@ import com.vdurmont.emoji.EmojiManager
  * @param[cow] indicator for cow
  * @param[vegan] indicator for vegan
  * @param[vegetarian] indicator for vegetarian
+ * @param[chicken] indicator for chicken
  */
 data class Meal(
     val name: String,
@@ -19,7 +20,8 @@ data class Meal(
     val pork: Boolean,
     val cow: Boolean,
     val vegan: Boolean,
-    val vegetarian: Boolean
+    val vegetarian: Boolean,
+    val chicken: Boolean
 ) {
     /**
      * Calculate a nice looking textual entry for a food (including emojis).
@@ -37,6 +39,11 @@ data class Meal(
         addCow(emojis)
         addVegan(emojis)
         addVegetarian(emojis)
+        addChicken(emojis)
+    }
+
+    private fun addChicken(emojis: MutableList<String>) {
+        if (chicken) emojis.add(":chicken:".toEmoji())
     }
 
     private fun addVegetarian(emojis: MutableList<String>) {

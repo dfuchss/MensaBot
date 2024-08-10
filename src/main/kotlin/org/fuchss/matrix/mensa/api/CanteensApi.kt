@@ -8,7 +8,7 @@ import kotlinx.datetime.todayIn
 /**
  * This interface defines the minimum functionality that a canteen provides.
  */
-interface CanteenAPI {
+interface CanteensApi {
     suspend fun foodToday() = foodAtDate(Clock.System.todayIn(TimeZone.currentSystemDefault()))
 
     /**

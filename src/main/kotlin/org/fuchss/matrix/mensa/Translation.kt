@@ -61,5 +61,8 @@ data class TranslationConfig(
     val ollamaUser: String? = null,
     val ollamaPassword: String? = null,
     val model: String = "llama3.1:8b",
-    val prompt: String = "Translate to English. No further output. Keep markdown. Add hint about the translation by {} at the end.\n{}"
+    val prompt: String =
+        "Translate this menu to English. " +
+            "Keep markdown and emojis. Just start with the markdown, no further output. " +
+            "In the end add 'Translated by {}.'\n{}"
 )
