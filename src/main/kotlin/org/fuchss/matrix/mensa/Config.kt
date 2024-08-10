@@ -27,6 +27,7 @@ import java.util.Date
  * @param[timeToSendUpdates] the time the bot shall send updates about the meals every day (to subscribed rooms)
  * @param[admins] the matrix ids of the admins. E.g. "@user:invalid.domain"
  * @param[subscribers] the room ids of rooms that subscribed updates
+ * @param[canteensForSubscribers] the canteens the bot shall provide information about (only affects subscribers)
  * @param[translation] the configuration for translations (optional, alpha)
  */
 data class Config(
@@ -39,6 +40,7 @@ data class Config(
     @JsonProperty override val users: List<String> = listOf(),
     @JsonProperty val timeToSendUpdates: LocalTime,
     @JsonProperty val subscribers: List<String>,
+    @JsonProperty val canteensForSubscribers: List<String> = listOf("adenauerring"),
     @JsonProperty val translation: TranslationConfig? = null
 ) : IConfig {
     companion object {

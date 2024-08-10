@@ -1,4 +1,4 @@
-package org.fuchss.matrix.mensa.swka
+package org.fuchss.matrix.mensa.kit
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -6,35 +6,37 @@ import io.ktor.client.request.request
 import io.ktor.http.HttpMethod
 import kotlinx.datetime.LocalDate
 import org.fuchss.matrix.mensa.api.Canteen
+import org.fuchss.matrix.mensa.api.CanteenApi
 import org.fuchss.matrix.mensa.api.CanteenLine
-import org.fuchss.matrix.mensa.api.CanteensApi
 import org.fuchss.matrix.mensa.api.Meal
 import org.fuchss.matrix.mensa.numberOfWeek
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.slf4j.LoggerFactory
 
-class SWKAMensa : CanteensApi {
+class SwkaMensa : CanteenApi {
     companion object {
-        private val logger = LoggerFactory.getLogger(SWKAMensa::class.java)
+        private val logger = LoggerFactory.getLogger(SwkaMensa::class.java)
         private const val SWKA_WEBSITE = "https://www.sw-ka.de/en/hochschulgastronomie/speiseplan/mensa_adenauerring/"
         private const val SWKA_WEBSITE_API = //
             "https://www.sw-ka.de/de/hochschulgastronomie/speiseplan/mensa_adenauerring/?view=ok&c=adenauerring&STYLE=popup_plain&kw=%%%WoY%%%"
         private val LINES_TO_CONSIDER = listOf("Linie ", "Schnitzel", "[pizza]werk Pizza", "[pizza]werk Pasta", "[kœri]werk")
     }
 
-    override suspend fun foodAtDate(date: LocalDate): Map<Canteen, List<CanteenLine>> {
+    override fun canteen() = Canteen("adenauerring", "Mensa am Adenauerring", link = SWKA_WEBSITE)
+
+    override suspend fun foodAtDate(date: LocalDate): List<CanteenLine> {
         val week = numberOfWeek(date)
         val html = request(week)
 
         val document = Jsoup.parse(html)
         val tableOfDay = document.select("h1:contains(${date.dayOfMonth.pad()}.${date.monthNumber.pad()}) + table")
         if (tableOfDay.isEmpty()) {
-            return emptyMap()
+            return emptyList()
         }
         if (tableOfDay.size != 1) {
             logger.error("Found more than one table for ${date.dayOfMonth.pad()}.${date.monthNumber.pad()}")
-            return emptyMap()
+            return emptyList()
         }
 
         val mensaLinesRaw = tableOfDay[0].select("td[width=20%] + td")
@@ -56,9 +58,7 @@ class SWKAMensa : CanteensApi {
         }
 
         mensaLines.sortBy { it.name }
-
-        val mensa = Canteen("adenauerring", "Mensa am Adenauerring", link = SWKA_WEBSITE)
-        return mapOf(mensa to mensaLines)
+        return mensaLines
     }
 
     private fun closed(meals: List<Meal>): Boolean {
@@ -81,7 +81,6 @@ class SWKAMensa : CanteensApi {
 
         return Meal(
             name = mealName,
-            foodAdditiveNumbers = emptyList(),
             fish = additionalInformation.contains("MSC"),
             pork = additionalInformation.contains("S") || additionalInformation.contains("SAT"),
             cow = additionalInformation.contains("R") || additionalInformation.contains("RAT"),

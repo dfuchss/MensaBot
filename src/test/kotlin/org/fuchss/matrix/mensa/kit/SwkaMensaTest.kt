@@ -1,4 +1,4 @@
-package org.fuchss.matrix.mensa.swka
+package org.fuchss.matrix.mensa.kit
 
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
@@ -12,14 +12,14 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
-class SWKAMensaTest {
+class SwkaMensaTest {
     /**
      * Check if the CanteenAPI of SWKA works.
      */
     @Test
     fun testSWKACanteenAPI() {
         runBlocking {
-            val mensa = SWKAMensa()
+            val mensa = SwkaMensa()
             val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
             val someWorkDay = if (today.dayOfWeek.value > 5) today.plus(2, DateTimeUnit.DAY) else today
             val food = mensa.foodAtDate(someWorkDay)

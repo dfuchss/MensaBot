@@ -16,11 +16,12 @@ import org.fuchss.matrix.bots.helper.createMediaStore
 import org.fuchss.matrix.bots.helper.createRepositoriesModule
 import org.fuchss.matrix.bots.helper.handleCommand
 import org.fuchss.matrix.bots.helper.handleEncryptedCommand
-import org.fuchss.matrix.mensa.api.CanteensApi
+import org.fuchss.matrix.mensa.api.CanteenApi
 import org.fuchss.matrix.mensa.handler.command.ShowCommand
 import org.fuchss.matrix.mensa.handler.command.SubscribeCommand
 import org.fuchss.matrix.mensa.handler.sendCanteenEventToRoom
-import org.fuchss.matrix.mensa.swka.SWKAMensa
+import org.fuchss.matrix.mensa.kit.MriMensa
+import org.fuchss.matrix.mensa.kit.SwkaMensa
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -36,7 +37,18 @@ private lateinit var commands: List<Command>
 fun main() {
     runBlocking {
         val config = Config.load()
-        val canteenApi: CanteensApi = SWKAMensa()
+        val canteenApis: List<CanteenApi> = listOf(SwkaMensa(), MriMensa())
+        val enabledApisForSubscribers =
+            canteenApis.filter {
+                config.canteensForSubscribers.isEmpty() ||
+                    config.canteensForSubscribers.contains(
+                        it.canteen().id
+                    )
+            }
+        if (enabledApisForSubscribers.isEmpty()) {
+            error("No canteens enabled. Invalid configuration.")
+        }
+
         val translationService = TranslationService(config.translation)
 
         commands =
@@ -47,7 +59,7 @@ fun main() {
                 QuitCommand(config),
                 LogoutCommand(config),
                 ChangeUsernameCommand(),
-                ShowCommand(canteenApi, translationService),
+                ShowCommand(canteenApis, translationService),
                 SubscribeCommand(config)
             )
 
@@ -58,7 +70,7 @@ fun main() {
         matrixBot.subscribeContent { event -> handleCommand(commands, event, matrixBot, config) }
         matrixBot.subscribeContent { event -> handleEncryptedCommand(commands, event, matrixBot, config) }
 
-        val timer = scheduleMensaMessages(matrixBot, config, canteenApi, translationService)
+        val timer = scheduleMensaMessages(matrixBot, config, enabledApisForSubscribers, translationService)
 
         val loggedOut = matrixBot.startBlocking()
 
@@ -95,7 +107,7 @@ private suspend fun getMatrixClient(config: Config): MatrixClient {
 private fun scheduleMensaMessages(
     matrixBot: MatrixBot,
     config: Config,
-    canteenApi: CanteensApi,
+    canteenApis: List<CanteenApi>,
     translationService: TranslationService
 ): Timer {
     val timer = Timer(true)
@@ -107,7 +119,7 @@ private fun scheduleMensaMessages(
 
                     for (roomId in config.subscriptions()) {
                         try {
-                            sendCanteenEventToRoom(roomId, matrixBot, true, canteenApi, translationService)
+                            sendCanteenEventToRoom(roomId, matrixBot, true, canteenApis, translationService)
                         } catch (e: Exception) {
                             logger.error(e.message, e)
                         }

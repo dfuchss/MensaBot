@@ -1,0 +1,26 @@
+package org.fuchss.matrix.mensa.kit
+
+import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.todayIn
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Test
+
+class MriMensaTest {
+    /**
+     * Check if the CanteenAPI of MRI works.
+     */
+    @Test
+    fun testMriCanteenAPI() {
+        runBlocking {
+            val mensa = MriMensa()
+            val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+            val someWorkDay = if (today.dayOfWeek.value > 5) today.minus(4, DateTimeUnit.DAY) else today
+            val food = mensa.foodAtDate(someWorkDay)
+            assertNotNull(food)
+        }
+    }
+}
