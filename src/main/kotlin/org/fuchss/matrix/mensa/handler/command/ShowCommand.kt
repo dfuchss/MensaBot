@@ -11,7 +11,10 @@ import org.fuchss.matrix.mensa.TranslationService
 import org.fuchss.matrix.mensa.api.CanteenApi
 import org.fuchss.matrix.mensa.handler.sendCanteenEventToRoom
 
-class ShowCommand(private val canteens: List<CanteenApi>, private val translationService: TranslationService) : Command() {
+class ShowCommand(
+    private val canteens: List<CanteenApi>,
+    private val translationService: TranslationService
+) : Command() {
     override val name: String = "show"
     override val help: String = "show the mensa plan for today, if id provided, show the mensa plan for the canteen with the id"
     override val params: String = "[canteen_id]"

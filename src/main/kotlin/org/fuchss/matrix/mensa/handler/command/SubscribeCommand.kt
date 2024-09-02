@@ -9,7 +9,9 @@ import org.fuchss.matrix.bots.command.Command
 import org.fuchss.matrix.bots.markdown
 import org.fuchss.matrix.mensa.Config
 
-class SubscribeCommand(private val config: Config) : Command() {
+class SubscribeCommand(
+    private val config: Config
+) : Command() {
     override val name: String = "subscribe"
     override val help: String = "shows instructions to subscribe for the channel"
 

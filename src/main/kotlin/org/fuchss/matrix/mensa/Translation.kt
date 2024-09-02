@@ -7,7 +7,9 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
-class TranslationService(private val config: TranslationConfig?) {
+class TranslationService(
+    private val config: TranslationConfig?
+) {
     private val logger: Logger = LoggerFactory.getLogger(TranslationService::class.java)
 
     private val chatModel = config?.let { createChatModel(it) }
@@ -48,7 +50,13 @@ class TranslationService(private val config: TranslationConfig?) {
     }
 
     private fun createChatModel(config: TranslationConfig): ChatLanguageModel {
-        val ollama = OllamaChatModel.builder().baseUrl(config.ollamaServerUrl).modelName(config.model).timeout(Duration.ofMinutes(15)).temperature(0.0)
+        val ollama =
+            OllamaChatModel
+                .builder()
+                .baseUrl(config.ollamaServerUrl)
+                .modelName(config.model)
+                .timeout(Duration.ofMinutes(15))
+                .temperature(0.0)
         if (config.ollamaUser != null && config.ollamaPassword != null) {
             ollama.customHeaders(mapOf("Authorization" to Credentials.basic(config.ollamaUser, config.ollamaPassword)))
         }

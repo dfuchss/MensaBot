@@ -5,4 +5,7 @@ package org.fuchss.matrix.mensa.api
  * @param[name] the name of the line
  * @param[meals] the food the line serves
  */
-data class CanteenLine(val name: String, val meals: List<Meal>)
+data class CanteenLine(
+    val name: String,
+    val meals: List<Meal>
+)

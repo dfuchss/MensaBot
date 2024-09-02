@@ -61,9 +61,7 @@ class SwkaMensa : CanteenApi {
         return mensaLines
     }
 
-    private fun closed(meals: List<Meal>): Boolean {
-        return meals.size == 1 && meals[0].name.lowercase().contains("geschlossen")
-    }
+    private fun closed(meals: List<Meal>): Boolean = meals.size == 1 && meals[0].name.lowercase().contains("geschlossen")
 
     private fun parseMeal(meal: Element): Meal? {
         val nameXPrice = meal.select("span.bg")
@@ -98,7 +96,11 @@ class SwkaMensa : CanteenApi {
             logger.warn("Found invalid additional information format: $additionalInformation")
             return emptyList()
         }
-        return additionalInformation.replace("[", "").replace("]", "").split(",").filter { it.isNotBlank() }
+        return additionalInformation
+            .replace("[", "")
+            .replace("]", "")
+            .split(",")
+            .filter { it.isNotBlank() }
     }
 
     private suspend fun request(weekOfYear: Int): String {
