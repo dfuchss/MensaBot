@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import kotlinx.datetime.LocalTime
-import kotlinx.datetime.toJavaLocalTime
 import net.folivo.trixnity.core.model.RoomId
 import org.fuchss.matrix.bots.IConfig
 import org.slf4j.Logger
@@ -14,6 +12,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import java.util.Date
 
@@ -72,7 +71,7 @@ data class Config(
      * Get the next time of the next reminder (notification to [subscriptions]).
      */
     fun nextReminder(): Date {
-        var nextUpdate = timeToSendUpdates.toJavaLocalTime().atDate(LocalDate.now()).atZone(ZoneId.systemDefault())
+        var nextUpdate = timeToSendUpdates.atDate(LocalDate.now()).atZone(ZoneId.systemDefault())
         if (!nextUpdate.toInstant().isAfter(Instant.now())) {
             // Else use tomorrow ..
             nextUpdate = nextUpdate.plusDays(1)
