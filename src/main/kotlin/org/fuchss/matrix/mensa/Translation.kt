@@ -1,8 +1,8 @@
 package org.fuchss.matrix.mensa
 
-import dev.langchain4j.model.chat.ChatLanguageModel
+import dev.langchain4j.model.chat.ChatModel
 import dev.langchain4j.model.ollama.OllamaChatModel
-import okhttp3.Credentials
+import okio.ByteString.Companion.encode
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -35,7 +35,7 @@ class TranslationService(
         }
 
         try {
-            translated = chatModel.generate(config.prompt.replaceFirst("{}", config.model).replaceFirst("{}", text))
+            translated = chatModel.chat(config.prompt.replaceFirst("{}", config.model).replaceFirst("{}", text))
         } catch (e: Exception) {
             logger.error("Error while translating text: $text", e)
             return text
@@ -49,7 +49,7 @@ class TranslationService(
         return translated
     }
 
-    private fun createChatModel(config: TranslationConfig): ChatLanguageModel {
+    private fun createChatModel(config: TranslationConfig): ChatModel {
         val ollama =
             OllamaChatModel
                 .builder()
@@ -58,7 +58,7 @@ class TranslationService(
                 .timeout(Duration.ofMinutes(15))
                 .temperature(0.0)
         if (config.ollamaUser != null && config.ollamaPassword != null) {
-            ollama.customHeaders(mapOf("Authorization" to Credentials.basic(config.ollamaUser, config.ollamaPassword)))
+            ollama.customHeaders(mapOf("Authorization" to "${config.ollamaUser}:${config.ollamaPassword}".encode().base64()))
         }
         return ollama.build()
     }
