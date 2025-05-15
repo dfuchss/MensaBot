@@ -5,12 +5,12 @@
     <parent>
         <groupId>org.fuchss</groupId>
         <artifactId>maven-parent</artifactId>
-        <version>0.21.40</version>
+        <version>0.22.0</version>
     </parent>
 
     <groupId>org.fuchss.matrix</groupId>
     <artifactId>mensabot</artifactId>
-    <version>0.28.9-SNAPSHOT</version>
+    <version>0.29.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>MensaBot</name>
 
@@ -88,7 +88,7 @@
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
-            <version>1.13.0-M2</version>
+            <version>1.13.0-M3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -110,7 +110,7 @@
                 <enabled>true</enabled>
             </snapshots>
             <id>mavenSnapshot</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
         </repository>
     </repositories>
 
