@@ -6,6 +6,7 @@ import io.ktor.client.request.request
 import io.ktor.http.HttpMethod
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import org.fuchss.matrix.mensa.api.Canteen
@@ -36,7 +37,7 @@ class MriMensa : CanteenApi {
         val mainContent = document.getElementById("content") ?: return emptyMap()
 
         val dateToFood = mutableMapOf<LocalDate, CanteenLine>()
-        var dateForEntry = date.minus(DatePeriod(days = date.dayOfWeek.value - 1))
+        var dateForEntry = date.minus(DatePeriod(days = date.dayOfWeek.isoDayNumber - 1))
 
         val entries = mainContent.getElementsByClass("elementor-column")
         var startFound = false

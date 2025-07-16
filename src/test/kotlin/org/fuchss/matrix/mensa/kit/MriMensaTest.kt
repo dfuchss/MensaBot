@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.minus
 import kotlinx.datetime.todayIn
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -18,7 +19,7 @@ class MriMensaTest {
         runBlocking {
             val mensa = MriMensa()
             val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-            val someWorkDay = if (today.dayOfWeek.value > 5) today.minus(4, DateTimeUnit.DAY) else today
+            val someWorkDay = if (today.dayOfWeek.isoDayNumber > 5) today.minus(4, DateTimeUnit.DAY) else today
             val food = mensa.foodAtDate(someWorkDay)
             assertNotNull(food)
         }

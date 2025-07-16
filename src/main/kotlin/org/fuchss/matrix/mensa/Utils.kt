@@ -2,6 +2,7 @@ package org.fuchss.matrix.mensa
 
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 
@@ -14,7 +15,7 @@ internal fun numberOfWeek(date: LocalDate): Int {
     // See ISO 8601
     val startOfYear = LocalDate(date.year, 1, 1)
     val firstDayOfWeekOne =
-        when (startOfYear.dayOfWeek.value) {
+        when (startOfYear.dayOfWeek.isoDayNumber) {
             1 -> startOfYear // Monday -> Monday (same week)
             2 -> startOfYear.minus(1, DateTimeUnit.DAY) // Tuesday -> Monday (same week)
             3 -> startOfYear.minus(2, DateTimeUnit.DAY) // Wednesday -> Monday (same week)
@@ -30,5 +31,5 @@ internal fun numberOfWeek(date: LocalDate): Int {
         // Last week of previous year
         return numberOfWeek(LocalDate(date.year - 1, 12, 31))
     }
-    return numberOfDays / 7 + 1
+    return numberOfDays.toInt() / 7 + 1
 }

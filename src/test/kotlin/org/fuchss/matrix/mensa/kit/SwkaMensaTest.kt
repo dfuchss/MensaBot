@@ -5,6 +5,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import org.fuchss.matrix.mensa.numberOfWeek
@@ -21,7 +22,7 @@ class SwkaMensaTest {
         runBlocking {
             val mensa = SwkaMensa()
             val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-            val someWorkDay = if (today.dayOfWeek.value > 5) today.plus(2, DateTimeUnit.DAY) else today
+            val someWorkDay = if (today.dayOfWeek.isoDayNumber > 5) today.plus(2, DateTimeUnit.DAY) else today
             val food = mensa.foodAtDate(someWorkDay)
             assertNotNull(food)
         }
